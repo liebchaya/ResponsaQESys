@@ -14,5 +14,9 @@
 	<classpathentry kind="var" path="localJARS/tagger/splitsvm.jar"/>
 	<classpathentry kind="var" path="localJARS/tagger/duck1.jar"/>
 	<classpathentry kind="lib" path="C:/jars/trove-3.0.0.jar"/>
+	<classpathentry kind="var" path="JARS/mysql-connector-java-5.1.12-bin.jar" sourcepath="/TPS/mysql-connector-java-5.1.15/src"/>
+	<classpathentry kind="var" path="localJARS/zip4j_1.3.1.jar"/>
+	<classpathentry kind="var" path="localJARS/javamail-1.4.jar"/>
+	<classpathentry kind="lib" path="/lucene.hebrew/lib/lucene-analyzers-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

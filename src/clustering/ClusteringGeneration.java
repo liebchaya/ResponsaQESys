@@ -2,11 +2,9 @@ package clustering;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,7 +17,6 @@ import morphology.Tagger;
 import obj.SortByWeightName;
 import obj.Term;
 import obj.WeightedTerm;
-import utils.TargetTerm2Id;
 
 
 import clustering.ClusterScorer.ScorerType;
@@ -27,12 +24,19 @@ import clustering.ClusterScorer.ScorerType;
 import com.aliasi.spell.EditDistance;
 import com.aliasi.util.Distance;
 
-import ac.biu.nlp.nlp.general.configuration.ConfigurationFile;
-import ac.biu.nlp.nlp.general.configuration.ConfigurationParams;
-
+/**
+ * Morphological clusters generation
+ * @author HZ
+ *
+ */
 public class ClusteringGeneration {
 	
-	
+	/**
+	 * @param taggerDir
+	 * @param termsDirName
+	 * @param topNum number of top related terms to cluster
+	 * @throws Exception
+	 */
 	public ClusteringGeneration(String taggerDir, String termsDirName, int topNum) throws Exception{
 		
 		m_confName = "Surface_Surface";
@@ -50,14 +54,24 @@ public class ClusteringGeneration {
 		String clsQueryField = "TERM_VECTOR";
 		Double scoreThreshold = 0.0;
 		File indexDir = null;
-		String termsDir = termsDirName + "/" + m_confName;
+//		String termsDir = termsDirName + "/" + m_confName;
 		
-		InitClusteringGeneration(m_confName,termsDir,indexDir,clsQueryField,m_morphType, 
+		InitClusteringGeneration(m_confName,termsDirName,indexDir,clsQueryField,m_morphType, 
 				termIndex,scoreIndex,topNum, scoreThreshold,distMeasure);
 	}
 	
 	/**
-	 * Init clustering fixed parameters
+	 * Initializes clustering fixed parameters
+	 * @param confName
+	 * @param termsDir
+	 * @param indexDir
+	 * @param queryField
+	 * @param morphType
+	 * @param termIndex
+	 * @param scoreIndex
+	 * @param topNum
+	 * @param scoreThresholdString
+	 * @param distMeasure
 	 */
 	private void InitClusteringGeneration(String confName, String termsDir, File indexDir, String queryField, int morphType,
 			int termIndex, int scoreIndex, int topNum, double scoreThresholdString, String distMeasure) {
@@ -72,7 +86,7 @@ public class ClusteringGeneration {
 	
 
 	/**
-	 * Load target term statistics for morphology pre-processing
+	 * Loads target term statistics for morphology pre-processing
 	 * @param statFile
 	 * @throws MorphDistancePrePException
 	 */
@@ -81,7 +95,7 @@ public class ClusteringGeneration {
 	}
 	
 	/**
-	 * Print function (utility)
+	 * Prints function (utility)
 	 * @param writer
 	 * @throws IOException
 	 */
@@ -96,9 +110,8 @@ public class ClusteringGeneration {
 	}
 	
 	/**
-	 * Generate cluster for the term that was loaded by {@link #loadTargetTermData(File) loadTargetTermData}
-	 * @param scoreType
-	 * @return
+	 * Generates clusters for the term that was loaded by {@link #loadTargetTermData(File) loadTargetTermData}
+	 * @return a list of clusters
 	 * @throws MorphDistancePrePException
 	 */
 	private LinkedList<Cluster> generateCluster() throws MorphDistancePrePException {
@@ -122,19 +135,22 @@ public class ClusteringGeneration {
 	}
 	
 	/**
-	 * Generate clusters for all the directory files
+	 * Generates clusters for all the directory files
 	 * @param fileType
 	 * @param topNum
 	 * @throws IOException
 	 * @throws MorphDistancePrePException
+	 * @return clusters directory name
 	 */
-	public void clusterDir(String fileType, int topNum) throws IOException, MorphDistancePrePException{
-		String clustersDirName = m_termsDirName + "/" + m_confName +  "/clusters" + topNum + "_" + m_scoreType + "_" + m_morphType;
+	public String clusterDir(String fileType, int topNum) throws IOException, MorphDistancePrePException{
+		String clustersDirName = m_termsDirName + "/clusters" + topNum + "_" + m_scoreType + "_" + m_morphType;
 		//create clusters' dir
+		System.out.println(clustersDirName);
 		File clustersDir = new File(clustersDirName);
 		if (!clustersDir.exists())
 			clustersDir.mkdir();
-		File termsDir = new File(m_termsDirName + "/" + m_confName);
+		File termsDir = new File(m_termsDirName);
+		System.out.println(termsDir.getAbsolutePath());
 		// cluster each file
 		for (File f:termsDir.listFiles()) {
 			if (f.isFile() && f.getAbsolutePath().endsWith(fileType)) {
@@ -146,6 +162,7 @@ public class ClusteringGeneration {
 				writer.close();
 			}
 		}
+		return clustersDirName;
 	}
 		
 	

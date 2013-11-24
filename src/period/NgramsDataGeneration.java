@@ -29,6 +29,11 @@ import search.QueryGenerator.InputType;
 import utils.StringUtils;
 import utils.TargetTerm2Id;
 
+/**
+ * Ngram data generation
+ * @author HZ
+ *
+ */
 public class NgramsDataGeneration {
 	
 	public NgramsDataGeneration(String oldIndex, String ngramsIndex, String modernIndex) throws CorruptIndexException, IOException {
@@ -46,10 +51,11 @@ public class NgramsDataGeneration {
 	 * @param oldNgramsFileName
 	 * @param modernJewishNgramsFileName
 	 * @param maxN
+	 * @param isFirstRun
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public void generateDataFiles(String outputDir, String expTargetTermFile, String oldNgramsFileName, String modernJewishNgramsFileName, int maxN) throws IOException, ParseException{
+	public void generateDataFiles(String outputDir, String expTargetTermFile, String oldNgramsFileName, String modernJewishNgramsFileName, int maxN, boolean isFirstRun) throws IOException, ParseException{
 		// FO n-grams extraction - from ngrams index
 		TargetTermType targetType = TargetTermType.Surface;
 		TargetTermRepresentation targetRp = new NgramsTargetTermRepresentation(targetType, expTargetTermFile, m_ngramsIndex);
@@ -84,15 +90,26 @@ public class NgramsDataGeneration {
 //						break;
 					String[] tokens = line.split("\t");
 					String candidate = tokens[0];
-					Query clusterQuery = m_qg.generate(formatQueryString(candidate));
+					String clusterString = formatQueryString(candidate);
+					if (clusterString.isEmpty()){
+						line = reader.readLine();
+						continue;
+					}
+					Query clusterQuery = m_qg.generate(clusterString);
 					System.out.println(clusterQuery);
 					int oldPeriodCount = m_ngramData.countOldPeriod(clusterQuery);
 					String origTargetTerm = TargetTerm2Id.getStrDesc(Integer.parseInt(f.getName().substring(0,f.getName().indexOf("_"))));
 					Pair<Integer,Integer> contribPair = m_ngramData.NgramPossibleContribution(clusterQuery, origTargetTerm, targetDocsSet);
 					System.out.println(formatQueryString(candidate).split("\t")[0]);
 					double meScore = me.score(formatQueryString(candidate).split("\t"));
-					int modernInter = m_ngramData.countModernIntersaction(clusterQuery, m_qg.generate(formatQueryString(origTargetTerm)));
-					writer.write(line + "\t" + oldPeriodCount + "\t" + contribPair.key() + "\t" + contribPair.value() + "\t" + modernInter + "\t" + meScore + "\n");
+					String candTerm = candidate.replaceAll("\'\"","");
+					int modernInter = 0;
+					if (!candTerm.equals(candidate))
+						modernInter = m_ngramData.countModernIntersaction(clusterQuery, m_qg.generate(formatQueryString(origTargetTerm)));
+					if (!isFirstRun)
+						writer.write(line + "\t" + oldPeriodCount + "\t" + contribPair.key() + "\t" + contribPair.value() + "\t" + modernInter + "\t" + meScore + "\n");
+					else
+						writer.write(line + "\t" + oldPeriodCount + "\t" + contribPair.key() + "\t" + contribPair.value() + "\t" + modernInter + "\t" + meScore + "\t-1\n");
 					line = reader.readLine();
 				}
 				reader.close();
@@ -112,7 +129,7 @@ public class NgramsDataGeneration {
 		HashSet<String> candSet = StringUtils.convertStringToSet(candidate);
 		for(String candTerm:candSet) {
 			//Clean up punctuation and digits
-			candTerm = candTerm.replaceAll("\\p{Punct}|\\d","");
+			candTerm = candTerm.replaceAll("\\p{Punct}|\\d","").trim();
 			formatedQuery = formatedQuery + candTerm + "\t";
 		}
 		return formatedQuery.trim();

@@ -5,19 +5,34 @@ import java.util.Set;
 import com.aliasi.util.Distance;
 import com.aliasi.util.Proximity;
 
-
+/**
+ * Morphological distance for morphological clustering
+ * @author HZ
+ * @see <a href="http://alias-i.com/lingpipe/docs/api/com/aliasi/util/Distance.html">Lingpipe distance interface</a>
+ */
 public class MorphDistance implements Distance<CharSequence>, Proximity<CharSequence>{
 
-	
+	/**
+	 * Morphological distance is based on the pre-processing data
+	 * @param pre
+	 */
 	public MorphDistance(MorphDistancePreprocessing pre) {
 		m_morphPreData = pre;
 	}
-		
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.aliasi.util.Proximity#proximity(java.lang.Object, java.lang.Object)
+	 */
 	public double proximity(CharSequence s1, CharSequence s2) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.aliasi.util.Proximity#proximity(java.lang.Object, java.lang.Object)
+	 */
 	public double distance(CharSequence s1, CharSequence s2) {
 		String str1 = s1.toString();
 		String str2 = s2.toString();

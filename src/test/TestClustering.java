@@ -4,8 +4,8 @@ import java.io.File;
 
 
 import utils.TargetTerm2Id;
-import ac.biu.nlp.nlp.general.configuration.ConfigurationFile;
-import ac.biu.nlp.nlp.general.configuration.ConfigurationParams;
+//import ac.biu.nlp.nlp.general.configuration.ConfigurationFile;
+//import ac.biu.nlp.nlp.general.configuration.ConfigurationParams;
 import clustering.ClusteringGeneration;
 
 public class TestClustering {
@@ -16,8 +16,8 @@ public class TestClustering {
 	public static void main(String[] args) throws Exception {
 		
 		String fileType = "_Dice.txt";
-		ConfigurationFile conf = new ConfigurationFile(args[0]);
-		ConfigurationParams clusterParam = conf.getModuleConfiguration("Clustering");
+//		ConfigurationFile conf = new ConfigurationFile(args[0]);
+//		ConfigurationParams clusterParam = conf.getModuleConfiguration("Clustering");
 		String taggerDir = clusterParam.get("tagger-dir");
 		int topNum = clusterParam.getInt("top-num");
 		String termsDirName = clusterParam.get("terms-dir");

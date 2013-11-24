@@ -21,23 +21,35 @@ import org.apache.lucene.util.Version;
 import utils.StringUtils;
 
 
-
+/**
+ * Lucene-based complex query generator
+ * @author HZ
+ *
+ */
 public class QueryGenerator {
 	
+	/**
+	 * Query format options
+	 */
 	public enum InputType{
 		Query,
 		Raw
 	}
 	
+	/**
+	 * Lucene-based query generator
+	 * @param analyzer
+	 * @param fieldName
+	 */
 	public QueryGenerator(Analyzer analyzer, String fieldName) {
 		m_cpqp = new ComplexPhraseQueryParser(Version.LUCENE_31, fieldName, analyzer);
 		m_type = InputType.Query;
 	}
 	
 	/**
-	 * Use ComplexPhraseQueryParser for generating complex queries
+	 * Uses ComplexPhraseQueryParser for generating complex queries
 	 * @param term
-	 * @return
+	 * @return generated query in Lucene format
 	 * @throws ParseException
 	 */
 	public Query generate(String term) throws ParseException{
@@ -57,10 +69,9 @@ public class QueryGenerator {
 	}
 	
 	/**
-	 * Generate complex query from a raw line
-	 * Get the output of an input file
-	 * @param reWritenQuery 
-	 * @return
+	 * Generates complex query from a raw line, gets the output of an input file
+	 * @param line
+	 * @return generated query in Lucene format
 	 * @throws QueryGenerationException
 	 */
 	public Query generateFromRaw(String line){
@@ -89,6 +100,12 @@ public class QueryGenerator {
 		}
 		
 	}
+	
+	/**
+	 * Generates SpanNearQuery of Lucene for multi-term queries
+	 * @param q
+	 * @return generated query in Lucene format
+	 */
 	public Query generateSpanNearQuery(String q){
 		Query query;
 		if(q.contains("\t"))
@@ -104,10 +121,9 @@ public class QueryGenerator {
 	}
 	
 	/**
-	 * Generate a raw line from complex query
-	 * Get the output of the rewrite function
+	 * Generates a raw line from complex query, gets the output of the rewrite function
 	 * @param reWritenQuery 
-	 * @return
+	 * @return string with a raw line
 	 * @throws QueryGenerationException
 	 */
 	public String generateToRaw(String reWritenQuery){
@@ -139,10 +155,18 @@ public class QueryGenerator {
 		}
 
 		
+	/**
+	 * Gets format generation type
+	 * @return format type
+	 */
 	public InputType getType() {
 		return m_type;
 	}
 
+	/**
+	 * Sets format generation type
+	 * @param m_type
+	 */
 	public void setType(InputType m_type) {
 		this.m_type = m_type;
 	}

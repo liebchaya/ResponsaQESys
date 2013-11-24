@@ -5,18 +5,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Set;
 
 import ac.biu.nlp.nlp.general.BidirectionalMap;
 import ac.biu.nlp.nlp.general.SimpleBidirectionalMap;
+import ac.biu.nlp.nlp.general.immutable.ImmutableSet;
 /**
- * 
- * @author Chaya Liebeskind
+ * Target term <-> id conversion
+ * @author HZ
  *
  */
 	public class TargetTerm2Id {
 		
 		private static BidirectionalMap<String,Integer> m_namesMap = null;
 		
+		/**
+		 * Loads target term file to a bi-directional map
+		 * @param input
+		 * @throws IOException
+		 */
 		public static void loadTargetTerm2IdMapping(File input) throws IOException {
 			m_namesMap = new SimpleBidirectionalMap<String, Integer>();
 			String encoding = FileUtils.getFileEncoding(input);
@@ -40,14 +47,36 @@ import ac.biu.nlp.nlp.general.SimpleBidirectionalMap;
 			}
 		}
 		
+		/**
+		 * Gets the id of the target term
+		 * @param strDesc
+		 * @return target term id
+		 */
 		public static int getIntDesc(String strDesc) {
 			return m_namesMap.leftGet(strDesc);
 		}
 		
+		/**
+		 * Gets the target term of a certain id
+		 * @param intDesc
+		 * @return target term
+		 */
 		public static String getStrDesc(int intDesc) {
 			return m_namesMap.rightGet(intDesc);
 		}
 		
+		/**
+		 * Gets the set of all the target terms ids
+		 * @return set of ids
+		 */
+		public static  ImmutableSet<Integer> getIds(){
+			return m_namesMap.rightSet();
+		}
+		
+		/**
+		 * Renames the files in a directory from ids to target term
+		 * @param dir
+		 */
 		public static void renameFiles(File dir){
 			for(File file:dir.listFiles()) {
 				String fileName = file.getName();

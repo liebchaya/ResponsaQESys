@@ -22,14 +22,17 @@ import search.QueryGenerator.InputType;
 import utils.TargetTerm2Id;
 
 /**
- * 
- * @author Chaya Liebeskind
- * This class is responsible for document extraction by target term representation
+ * Documents' extraction by target term representation (for ngrams)
+ * @author HZ
  *
  */
 public class NgramsTargetTermRepresentation extends TargetTermRepresentation{
 
-	
+	/**
+	 * @param targetType
+	 * @param targetTermsFile
+	 * @param modernJewishIndexName
+	 */
 	public NgramsTargetTermRepresentation(TargetTermType targetType, String targetTermsFile, String modernJewishIndexName) {
 		super(targetType);
 		m_targetTermFile = targetTermsFile;
@@ -38,10 +41,9 @@ public class NgramsTargetTermRepresentation extends TargetTermRepresentation{
 	}
 
 	/**
-	 * Get the type of the target term representation, query with the suitable input formatted file and the
+	 * Gets the type of the target term representation, query with the suitable input formatted file and the
 	 * corresponding index
-	 * @param type
-	 * @return HashMap<String,ArrayList<ScoreDoc>> A set of target terms with their extracted documents
+	 * @return a map of target terms with their extracted documents
 	 * @throws IOException
 	 * @throws ParseException
 	 */

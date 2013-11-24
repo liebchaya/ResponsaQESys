@@ -21,9 +21,9 @@ import utils.StringUtils;
 public class ClusterList {
 	
 	/**
-	 * Convert map to a set of clusters
+	 * Converts a map to a set of clusters
 	 * @param map
-	 * @return Set
+	 * @return a set of clusters
 	 */
 	public static HashSet<Cluster> mapToClusters(HashMap<String,HashSet<String>> map) {
 		HashSet<Cluster> clusters = new HashSet<Cluster>();
@@ -36,10 +36,10 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Convert map to a set of clusters with a default annotation
+	 * Converts a map to a set of clusters with a default annotation
 	 * @param map
 	 * @param bAnno
-	 * @return
+	 * @return a set of clusters
 	 */
 	public static HashSet<Cluster> mapToClusters(HashMap<String,HashMap<String,Integer>> map, boolean bAnno) {
 		HashSet<Cluster> clusters = new HashSet<Cluster>();
@@ -58,10 +58,10 @@ public class ClusterList {
 	}
 	
 	 /**
-	  * Convert map to a list of clusters with a default annotation
+	  * Converts a map to a list of clusters with a default annotation
 	  * @param map
 	  * @param bAnno
-	  * @return List
+	  * @return a list of clusters
 	  */
 	public static LinkedList<Cluster> mapToClustersList(HashMap<String,HashMap<String,Integer>> map, boolean bAnno) {
 		LinkedList<Cluster> clusters = new LinkedList<Cluster>();
@@ -80,9 +80,9 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Convert weighted terms list to a list of clusters
+	 * Converts weighted terms list to a list of clusters
 	 * @param responsaScores - weighted terms list
-	 * @return
+	 * @return a list of clusters
 	 */
 	public static LinkedList<Cluster> wtListToClusters(List<WeightedTerm> responsaScores) {
 		LinkedList<Cluster> clusters = new LinkedList<Cluster>();
@@ -93,9 +93,9 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Convert a list of clusters to a list of weighted terms
+	 * Converts a list of clusters to a list of weighted terms
 	 * @param responsaClusters
-	 * @return
+	 * @return a list of weighted terms
 	 */
 	public static LinkedList<WeightedTerm> clustersToWt(List<Cluster> responsaClusters) {
 		LinkedList<WeightedTerm> responsaScores = new LinkedList<WeightedTerm>();
@@ -106,7 +106,7 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Assign clusters' judgment by a list of positive terms 
+	 * Assigns clusters' judgment by a list of positive terms 
 	 * @param clusters
 	 * @param posTerms
 	 */
@@ -127,9 +127,9 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Get the number of clusters with conflicts from a cluster list
+	 * Gets the number of clusters with conflicts from a cluster list
 	 * @param clusters
-	 * @return int
+	 * @return number of conflicts
 	 */
 	public static int getClustersConflictsNum(LinkedList<Cluster> clusters){
 		int num = 0;
@@ -143,7 +143,7 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Initiate a list of clusters with the same judgment
+	 * Initiates a list of clusters with the same judgment
 	 * @param clusters
 	 * @param anno
 	 */
@@ -154,10 +154,10 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Get the number of missing clusters (clusters which appears in relevant clusters list, but not in the judged list
+	 * Gets the number of missing clusters (clusters which appears in relevant clusters list, but not in the judged list
 	 * @param judgedClusters
 	 * @param relevantClusterJudges
-	 * @return int
+	 * @return number of missing clusters 
 	 */
 	public static int getClustersMissingNum(LinkedList<Cluster> judgedClusters,HashSet<Cluster> relevantClusterJudges){
 		int num = 0;
@@ -171,9 +171,9 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Load cluster list from a file
+	 * Loads cluster list from a file
 	 * @param clustersFile
-	 * @return List
+	 * @return a list
 	 * @throws IOException
 	 */
 	public static LinkedList<Cluster> loadClusterFromFile(File clustersFile) throws IOException{
@@ -190,9 +190,9 @@ public class ClusterList {
 	}
 	
 	/**
-	 * Convert cluster list to a string list
+	 * Converts cluster list to a string list
 	 * @param responsaClusters
-	 * @return
+	 * @return a list of terms
 	 */
 	public static LinkedList<String> convertClusters2StringList(List<Cluster> responsaClusters) {
 		LinkedList<String> stringSet = new LinkedList<String>();

@@ -1,5 +1,9 @@
 package representation;
-
+/**
+ * Choosing the right index for feature representation
+ * @author HZ
+ *
+ */
 public class FeatureRepresentation {
 	/**
 	 * Possible feature representations
@@ -11,25 +15,24 @@ public class FeatureRepresentation {
 	}
 	
 	/**
-	 * 
-	 * @author Chaya Liebeskind
-	 * This class is responsible for choosing the right index for feature representation
-	 *
+	 * @param responsaMainDir
+	 * @param featureType
 	 */
 	public FeatureRepresentation(String responsaMainDir,FeatureType featureType){
 		m_indexDir = responsaMainDir+"/indexes/";
 		m_type = featureType;
 	}
 	
+	/**
+	 * @param featureType
+	 */
 	public FeatureRepresentation(FeatureType featureType){
 		m_type = featureType;
 	}
 	
 	/**
-	 * Get the index for feature extraction
-	 * Set indication whether to remove features marked with "$"
-	 * @param type
-	 * @return
+	 * Gets the index for feature extraction, sets indication whether to remove features marked with "$"
+	 * @return index name
 	 */
 	public String getIndexNameByRepresentation() {
 		String indexName = null;
@@ -48,11 +51,18 @@ public class FeatureRepresentation {
 		return m_indexDir+indexName;		
 	}
 	
-
+	/**
+	 * Checks whether to remove marked ($) features
+	 * @return true/false
+	 */
 	public boolean isRemoveMarkedFeatures() {
 		return m_removeMarkedFeatures;
 	}
 	
+	/**
+	 * Gets feature type
+	 * @return feature type
+	 */
 	public FeatureType getFeatureType(){
 		return m_type;
 	}

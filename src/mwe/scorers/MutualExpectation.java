@@ -1,21 +1,17 @@
 package mwe.scorers;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
-
+/**
+ * Mutual Expectation implementation
+ * @see <a href="http://project.cgm.unive.it/events/papers/dias.pdf">(Dias et al., 1999)</a>
+ * @author HZ
+ *
+ */
 public class MutualExpectation implements MWEScorer {
-
-	public static void main(String[] args) throws IOException{
-		MutualExpectation me = new MutualExpectation("C:\\responsa",4);
-		System.out.println("בית הצואר " + me.score("בית הצואר"));
-		System.out.println("בית המקדש " + me.score("בית המקדש"));
-		System.out.println("בית ספר " + me.score("בית ספר"));
-		System.out.println("בית הוא " + me.score("בית הוא"));
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -40,9 +36,9 @@ public class MutualExpectation implements MWEScorer {
 	}
 	
 	/**
-	 * Calculate normalizedExpectation
+	 * Calculates normalizedExpectation
 	 * @param ngram
-	 * @return
+	 * @return normalizedExpectation score
 	 */
 	private double normalizedExpectation(String ngram){
 		double score = 0.0;
@@ -61,9 +57,9 @@ public class MutualExpectation implements MWEScorer {
 	}
 	
 	/**
-	 * Treat a cluster of ngrams as {@link mwe.scorers.MWEScorer#score}
-	 * @param ngrams
-	 * @return
+	 * Treats a cluster of ngrams as {@link mwe.scorers.MWEScorer#score}
+	 * @param ngrams an array of morphological variants of the ngram
+	 * @return mutual expectation score
 	 */
 	public double score(String[] ngrams) {
 		int counter = 0;
@@ -88,9 +84,9 @@ public class MutualExpectation implements MWEScorer {
 	}
 	
 	/**
-	 * Treat a cluster of ngrams as {@link #normalizedExpectation(String)}
-	 * @param ngrams
-	 * @return
+	 * Treats a cluster of ngrams as {@link #normalizedExpectation(String)}
+	 * @param ngrams ngrams an array of morphological variants of the ngram
+	 * @return normalizedExpectation score
 	 */
 	private double normalizedExpectation(String[] ngrams){
 		double score = 0.0;
@@ -118,7 +114,11 @@ public class MutualExpectation implements MWEScorer {
 		return score;
 	} 
 	
-	
+	/**
+	 * @param ngramsFileName NSP format, See <a href="http://jnsp.sourceforge.net/">http://jnsp.sourceforge.net/</a> 
+	 * @param maxN max n for n-gram
+	 * @throws IOException
+	 */
 	public MutualExpectation(String ngramsFileName, int maxN) throws IOException {
 		m_ngramCounts = new HashMap<Integer, Integer>();
 		m_ngramsData = new HashMap<String, String>();
@@ -148,9 +148,9 @@ public class MutualExpectation implements MWEScorer {
 	}
 
 	/**
-	 * Merge data files of the same format
-	 * @param ngramsFileName
-	 * @param maxN
+	 * Merges data files of the same format
+	 * @param ngramsFileName NSP format, See <a href="http://jnsp.sourceforge.net/">http://jnsp.sourceforge.net/</a> 
+	 * @param maxN max n for n-gram
 	 * @throws IOException
 	 */
 	public void addNgramsData(String ngramsFileName, int maxN) throws IOException {

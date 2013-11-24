@@ -3,21 +3,55 @@ package utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
+/**
+ * Utilities for file treatment
+ * @author HZ
+ *
+ */
 public class FileUtils {
 	
 	/**
-	 * Detect a file encoding
+	 * Reads text from an open reader into a list of strings, each containing one line of the file.
+	 * @param reader
+	 * @return list of strings (each line is a string)
+	 * @throws IOException
+	 */
+	public static List<String> loadReaderToList(Reader reader) throws IOException {
+		List<String> outList = new LinkedList<String>();
+		String line;
+		BufferedReader bufferedReader = new BufferedReader(reader);
+		while ((line = bufferedReader.readLine()) != null) 
+			outList.add(line);
+		return outList;
+	}
+	
+	/**
+	 * Reads text from a local file into a list of strings, each containing one line of the file.
+	 * @param iFile
+	 * @return list of strings (each line is a string)
+	 * @throws IOException
+	 */
+	public static List<String> loadFileToList(File iFile) throws IOException {
+		return loadReaderToList(new FileReader(iFile));
+	}
+	
+	/**
+	 * Detects a file encoding
 	 * @param file
-	 * @return
+	 * @return encoding string
 	 * @throws IOException
 	 */
 	public static String getFileEncoding(File file) throws IOException{
@@ -49,10 +83,10 @@ public class FileUtils {
 	}
 	
 	/**
-	 * Read a file into a String
+	 * Reads a file into a String
 	 * @param file
 	 * @param encoding
-	 * @return
+	 * @return a string with all the file content
 	 * @throws IOException
 	 */
 	public static String loadFileToString(File file, String encoding) throws IOException 
@@ -77,7 +111,7 @@ public class FileUtils {
 	/**
 	 * Reads a text file into a list of strings, each containing one line of the file
 	 * @param iFile
-	 * @return
+	 * @return a set of strings
 	 * @throws IOException
 	 */
 	public static HashSet<String> loadFileToSet(File iFile) throws IOException {
@@ -90,6 +124,24 @@ public class FileUtils {
 		return outList;
 	}
 
+	/**
+	 * Deletes a directory
+     * By default File#delete fails for non-empty directories, it works like "rm". 
+     * We need something a little more brutual - this does the equivalent of "rm -r"
+     * @param path Root File Path
+     * @return true iff the file and all sub files/directories have been removed
+     * @throws FileNotFoundException
+     */
+    public static boolean deleteRecursive(File path) throws FileNotFoundException{
+        if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
+        boolean ret = true;
+        if (path.isDirectory()){
+            for (File f : path.listFiles()){
+                ret = ret && FileUtils.deleteRecursive(f);
+            }
+        }
+        return ret && path.delete();
+    }
 
 
 }

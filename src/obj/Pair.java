@@ -1,11 +1,10 @@
 package obj;
 
 /**
- * 
- * @author BURST project
- *
- * @param <K>
- * @param <V>
+ * Pair implementation
+ * @author HZ
+ * @param <K> key
+ * @param <V> value
  */
 public class Pair<K, V> {
 	public Pair(K iK, V iV)

@@ -4,12 +4,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Scoring clusters
+ * Cluster scoring
  * @author HZ
  *
  */
 public class ClusterScorer {
 	
+	/**
+	 * Types of scoring methods
+	 */
 	public enum ScorerType
 	{
 		SUMSCORE,
@@ -18,19 +21,27 @@ public class ClusterScorer {
 		MAXLENGTH
 	}
 	
+	/**
+	 * @param input
+	 * @param type
+	 */
 	public ClusterScorer(Map<String, Double> input, ScorerType type) {
 			m_scoreMap = input;
 			m_type = type;
 		}
 	
+	/**
+	 * Sets the cluster scorer type
+	 * @param type
+	 */
 	public void setScorerType(ScorerType type) {
 		m_type = type;
 	}
 	
 	/**
-	 * Assign cluster score by ScorerType
+	 * Assigns cluster score by ScorerType
 	 * @param cluster
-	 * @return
+	 * @return cluster score
 	 * @throws MorphDistancePrePException
 	 */
 	public Double getClusterScore(Set<String> cluster) throws MorphDistancePrePException {

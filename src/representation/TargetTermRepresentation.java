@@ -27,9 +27,8 @@ import search.QueryGenerator.InputType;
 import utils.TargetTerm2Id;
 
 /**
- * 
- * @author Chaya Liebeskind
- * This class is responsible for document extraction by target term representation
+ * Documents' extraction by target term representation
+ * @author HZ
  *
  */
 public class TargetTermRepresentation {
@@ -45,6 +44,10 @@ public class TargetTermRepresentation {
 		AllBest
 	}
 	
+	/**
+	 * @param responsaMainDir
+	 * @param targetType
+	 */
 	public TargetTermRepresentation(String responsaMainDir, TargetTermType targetType){
 		m_qg = new QueryGenerator(new StandardAnalyzer(Version.LUCENE_31),"TERM_VECTOR");
 		m_indexDir = responsaMainDir+"/indexes/";
@@ -52,16 +55,18 @@ public class TargetTermRepresentation {
 		m_type = targetType;
 	}
 	
+	/**
+	 * @param targetType
+	 */
 	public TargetTermRepresentation(TargetTermType targetType){
 		m_qg = new QueryGenerator(new StandardAnalyzer(Version.LUCENE_31),"TERM_VECTOR");
 		m_type = targetType;
 	}
 	
 	/**
-	 * Get the type of the target term representation, query with the suitable input formatted file and the
+	 * Gets the type of the target term representation, query with the suitable input formatted file and the
 	 * corresponding index
-	 * @param type
-	 * @return Map A set of target terms with their extracted documents
+	 * @return a map of target terms with their extracted documents
 	 * @throws IOException
 	 * @throws ParseException
 	 */
@@ -110,10 +115,18 @@ public class TargetTermRepresentation {
 		
 	}
 	
+	/**
+	 * Gets target term type
+	 * @return target term type
+	 */
 	public TargetTermType getTargetTermType(){
 		return m_type;
 	}
 	
+	/**
+	 * Sets target term type
+	 * @param type
+	 */
 	public void setTargetTermType(TargetTermType type){
 		m_type = type;
 	}

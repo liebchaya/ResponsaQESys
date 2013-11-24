@@ -34,18 +34,16 @@ import utils.TargetTerm2Id;
 
 import ac.biu.nlp.nlp.general.SimpleBidirectionalMap;
 
-/*
+/**
  * Implements first-order statistics extraction
  */
 public class FeatureVectorExtractor {
 	
-	/*
-	 * @param StatScorer - first-order statistical scorer
-	 * @param FeatureRepresentation - candidates representation
- 	 *	defines how to treat the terms in the index
- 	 *	previously used for morphological representation
+	/**
+	 * Defines how to treat the terms in the index, previously used for morphological representation
+	 * @param scorer first-order statistical scorer
+	 * @param featureRp candidates representation
 	 */
-	
 	public FeatureVectorExtractor(StatScorer scorer, FeatureRepresentation featureRp) throws CorruptIndexException, IOException{
 		m_scorer = scorer;
 		m_featureRp = featureRp;
@@ -53,14 +51,12 @@ public class FeatureVectorExtractor {
 		loadFeatureDataFromIndex();
 	}
 	
-	/*
-	 * @param StatScorer - first-order statistical scorer
-	 * @param FeatureRepresentation - candidates representation
- 	 *	defines how to treat the terms in the index
- 	 *	previously used for morphological representation
- 	 * @param boolean - for accumulative measures (not used, default=false)
+	/**
+	 * Defines how to treat the terms in the index, previously used for morphological representation
+	 * @param scorer first-order statistical scorer
+	 * @param featureRp candidates representation
+ 	 * @param accum for accumulative measures (not used, default=false)
 	 */
-	
 	public FeatureVectorExtractor(StatScorer scorer, FeatureRepresentation featureRp, boolean accum) throws CorruptIndexException, IOException{
 		m_scorer = scorer;
 		m_featureRp = featureRp;
@@ -70,10 +66,9 @@ public class FeatureVectorExtractor {
 	}
 	
 	/**
-	 * Load candidates' frequency
+	 * Loads candidates' frequency, currently the data is not loaded to avoid memory problems
 	 * @throws IOException
 	 */
-	 
 	private void loadFeatureDataFromIndex() throws IOException{
 //		int featureId = 0;
 		m_featureDesc2Id = new SimpleBidirectionalMap<String,Integer>();
@@ -118,15 +113,14 @@ public class FeatureVectorExtractor {
 	}
 	
 	/**
-	 * Extract co-occurring candidates for the target terms
-	 * @param HashMap target terms' map with the document numbers, where the target terms appear
-	 * @param TargetTermType target term's representation type 
+	 * Extracts co-occurring candidates for the target terms
+	 * @param targetDocs target terms' map with the document numbers, where the target terms appear
+	 * @param targetType target term's representation type 
 	 * @param outputDir output directory
-	 * @return list of candidates with their weights
+	 * @return path of statistics folder
 	 * @throws IOException
 	 */
-	
-	public void extractTargetTermVectors(HashMap<String,ArrayList<ScoreDoc>> targetDocs, TargetTermType targetType,  File outputDir) throws IOException{
+	public String extractTargetTermVectors(HashMap<String,ArrayList<ScoreDoc>> targetDocs, TargetTermType targetType,  File outputDir) throws IOException{
 		BufferedWriter writer = null;
 		if(!outputDir.exists())
 			outputDir.mkdir();
@@ -152,15 +146,16 @@ public class FeatureVectorExtractor {
 			}
 			System.out.println("Finish target term stat. extraction " + target);
 		}
+		return configDir.getAbsolutePath();
 	}
 	
 	
 	/**
-	 * Extract co-occurring candidates for a target term
-	 * @param List the documents numbers, where the target terms appear 
+	 * Extracts co-occurring candidates for a target term
+	 * @param targetDocs the documents numbers, where the target terms appear
+	 * @return list of weighted terms 
 	 * @throws IOException
 	 */
-	
 	private List<WeightedTerm> getTargetTermVector(List<ScoreDoc> targetDocs) throws IOException{
 		List<WeightedTerm> featureList = new LinkedList<WeightedTerm>();
 		if (targetDocs.size() == 0)
@@ -193,7 +188,9 @@ public class FeatureVectorExtractor {
 				
 				if (!m_featureDesc2Id.leftContains(term)){
 					int freq = m_reader.docFreq(new org.apache.lucene.index.Term("TERM_VECTOR",term));
-					if (freq == 0)
+					/*chaya 6.10.13*/
+//					if (freq == 0)
+					if (freq < 2)
 						continue;
 					m_featureDesc2Id.put(term, m_featureId);
 					m_featureFreq.put(m_featureId, freq);

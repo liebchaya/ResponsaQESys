@@ -7,27 +7,31 @@ import java.util.HashSet;
 
 import obj.Pair;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 
-import search.QueryGenerator;
-import utils.StringUtils;
 
+/**
+ * Ngram data, including period and index intersection 
+ * @author HZ
+ *
+ */
 public class NgramData {
 	
+	/**
+	 * Initializes all the necessary indexes
+	 * @param oldIndex
+	 * @param ngramsIndex
+	 * @param modernIndex
+	 * @throws CorruptIndexException
+	 * @throws IOException
+	 */
 	public NgramData(String oldIndex, String ngramsIndex, String modernIndex) throws CorruptIndexException, IOException{
 		m_oldSearcher =  new IndexSearcher(FSDirectory.open(new File(oldIndex)));
 		m_ngramsSearcher = new IndexSearcher(FSDirectory.open(new File(ngramsIndex)));
@@ -36,11 +40,21 @@ public class NgramData {
 	}
 	
 	/**
-	 * 
+	 * Use this constructor if you only use the {@link #countOldPeriod(Query) countOldPeriod} method
+	 * @param oldIndex
+	 * @throws CorruptIndexException
+	 * @throws IOException
+	 */
+	public NgramData(String oldIndex) throws CorruptIndexException, IOException{
+		m_oldSearcher =  new IndexSearcher(FSDirectory.open(new File(oldIndex)));
+	}
+	
+	/**
+	 * Gets ngram possible contribution
 	 * @param clusterQuery
 	 * @param targetTerm
 	 * @param termsData
-	 * @return Pair<Integer,Integer> - Added documents by the ngram, Intersecting documents 
+	 * @return Added documents by the ngram, Intersecting documents 
 	 * @throws IOException
 	 */
 	public Pair<Integer,Integer> NgramPossibleContribution(Query clusterQuery, String targetTerm, HashMap<String,HashSet<Integer>>termsData) throws IOException{
@@ -57,9 +71,9 @@ public class NgramData {
 	}
 	
 	/**
-	 * Period classification by appearances in the old corpus
+	 * Gets period classification by appearances in the old corpus
 	 * @param clusterQuery
-	 * @return
+	 * @return number of appearances in the old corpus
 	 * @throws IOException
 	 */
 	public int countOldPeriod(Query clusterQuery) throws IOException{
@@ -73,7 +87,7 @@ public class NgramData {
 	 * Counts the intersection between the ngram and the target term in the modern corpus
 	 * @param clusterQuery
 	 * @param morphTargetTermQuery
-	 * @return
+	 * @return intersection of the target term with the extracted related term
 	 * @throws IOException
 	 */
 	public int countModernIntersaction(Query clusterQuery, Query morphTargetTermQuery) throws IOException{
@@ -82,7 +96,18 @@ public class NgramData {
 		bq.add(clusterQuery,Occur.MUST);
 		bq.add(morphTargetTermQuery,Occur.MUST);
 		m_modernSearcher.search(bq, collector);
-		return collector.getTotalHits();
+		int inter = collector.getTotalHits();
+		if(inter > 0)
+			return 0;
+		else {
+			BooleanQuery bq2 = new BooleanQuery();
+			bq2.add(clusterQuery,Occur.MUST);
+			m_modernSearcher.search(bq2, collector);
+			int freq = collector.getTotalHits();
+			if (freq > 2)
+				return freq;
+		}
+		return 0;
 	}
 
 	private IndexSearcher m_oldSearcher;

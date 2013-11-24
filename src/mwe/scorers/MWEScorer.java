@@ -1,15 +1,19 @@
 package mwe.scorers;
 
+/**
+ * Interface for Multi-word expression(MWE) scorers
+ * @author HZ
+ *
+ */
 public interface MWEScorer {
 	/**
-	 * Score the ngram 
+	 * Scores the ngram 
 	 * @param ngram
 	 * @return ngram score
 	 */
-	
 	public double score(String ngram);
 	/**
-	 * Get the MWE scorer name
+	 * Gets the MWE scorer name
 	 * @return scorer name
 	 */
 	public String getName();

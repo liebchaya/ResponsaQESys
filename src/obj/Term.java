@@ -1,6 +1,10 @@
 package obj;
 
-
+/**
+ * Term representation
+ * @author HZ
+ *
+ */
 public class Term {
 
 	public Term(String m_value, String m_lemma) {

@@ -24,14 +24,18 @@ import org.apache.lucene.store.FSDirectory;
 import utils.StringUtils;
 import utils.TargetTerm2Id;
 
-
+/**
+ * Pre-processing morphological data (before clustering)
+ * @author HZ
+ *
+ */
 public class MorphDistancePreprocessing {
 	
 	/**
 	 * 
 	 * @param termsDir
-	 * @param indexDir	assign null in case of Unigrams
-	 * @param queryField
+	 * @param indexDir	assign null
+	 * @param queryField currently not in use
 	 * @param morphType 1 = allLemmas, 2 = best lemma
 	 * @param termIndex		the index of the term in the splitted line
 	 * @param scoreIndex	the index of the score in the splitted line - might be -1
@@ -54,10 +58,11 @@ public class MorphDistancePreprocessing {
 	/**
 	 * Loads the input file and pre-process the data (for MorphDist)
 	 * @param queryTerm
-	 * The score field is used for saving the judgment when necessary 
-	 * @return				Map<String,Double>
+	 * @param confName
+	 * @return	map of morphological data
 	 * @throws MorphDistancePrePException
 	 */
+	@Deprecated
 	public Map<String,Double> loadDataFile(String queryTerm, String confName) throws MorphDistancePrePException{
 		m_unigramsFreq = new HashMap<String, Integer>();
 		m_dataMap = new HashMap<String, Set<String>>();
@@ -72,20 +77,22 @@ public class MorphDistancePreprocessing {
 			}
 //			String encoding = FileUtils.getFileEncoding(file);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
+			System.out.println(file.getAbsolutePath());
 	    	String line = reader.readLine(); //skip the first line
 	    	if(m_skipFirst)
 	    		line = reader.readLine();
 	    	int counter = 0;
-	    	
 	    	String sep = "_";
 	    	if (!queryTerm.contains(sep))
 	    		sep = ".";
 //	    	Set<String> AllLemmas = MorphLemmatizer.getAllPossibleLemmas(queryTerm.substring(0,queryTerm.indexOf(sep)).trim());
 //	    	AllLemmas.add(queryTerm.substring(0,queryTerm.indexOf(sep)).trim());
 //	    	Set<String> BestLemma = MorphLemmatizer.getMostProbableLemma(queryTerm.substring(0,queryTerm.indexOf(sep)).trim());
-	    	
+	    	System.out.println(queryTerm);
+	    	System.out.println(TargetTerm2Id.getStrDesc(Integer.parseInt(queryTerm.substring(0,queryTerm.indexOf(sep)).trim())).split("\t"));
 	    	//chaya 18/6/13
 	    	String [] tokens = TargetTerm2Id.getStrDesc(Integer.parseInt(queryTerm.substring(0,queryTerm.indexOf(sep)).trim())).split("\t");
+	    	System.out.println(tokens);
 	    	Set<String> BestLemma = new HashSet<String>();
 	    	for(String t : tokens)
 	    		BestLemma.addAll(Tagger.getTaggerLemmas(t));
@@ -181,10 +188,9 @@ public class MorphDistancePreprocessing {
 	
 	/**
 	 * Loads the input file and pre-process the data (for MorphDist)
-	 * @param LinkedList<WeightedTerm> list of terms
-	 * @param insertScore whether to save scores
-	 * The score field is used for saving the judgment when necessary 
-	 * @return				Map<String,Double>
+	 * @param termsList list of terms
+	 * @param insertScore whether to save scores, the score field is used for saving the judgment when necessary 
+	 * @return	map of morphological data
 	 * @throws MorphDistancePrePException
 	 */
 	public Map<String,Double> loadDataFile(LinkedList<WeightedTerm> termsList, boolean insertScore) throws MorphDistancePrePException{
@@ -228,7 +234,7 @@ public class MorphDistancePreprocessing {
 	/**
 	 * Gets the lemmas list for a specific term
 	 * @param term
-	 * @return	Set<String>
+	 * @return	lemmas' set
 	 * @throws MorphDistancePrePException
 	 */
 	public Set<String> getLemmasList(String term) throws MorphDistancePrePException {
@@ -243,7 +249,7 @@ public class MorphDistancePreprocessing {
 	/**
 	 * Gets the least frequent unigram from a multi-word expression
 	 * @param multiwordTerm
-	 * @return	String
+	 * @return	unigram string
 	 * @throws MorphDistancePrePException
 	 */
 	private String getLessFrequentUnigram(String multiwordTerm) throws MorphDistancePrePException{

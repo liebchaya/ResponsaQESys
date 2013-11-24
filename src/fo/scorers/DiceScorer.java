@@ -1,8 +1,20 @@
 package fo.scorers;
 
+/**
+ * Dice coefficient scorer
+ * @author HZ
+ *
+ */
 public class DiceScorer implements StatScorer{
 	
-
+	/**
+	 * Calculates dice coefficient, Dice = (2*iJointCount)/(iElementCount+iFeatureCount)
+	 * @param iTotalElementCount
+	 * @param iElementCount
+	 * @param iFeatureCount
+	 * @param iJointCount
+	 * @return dice score 
+	 */
 	public double score(long iTotalElementCount, long iElementCount, long iFeatureCount, long iJointCount)
 	{
 		//dice = (2*c.doc_clicks)/(a.doc_freq+b.doc_freq) 
@@ -14,6 +26,10 @@ public class DiceScorer implements StatScorer{
 		return score;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see fo.scorers.StatScorer#getName()
+	 */
 	public String getName() {
 		return m_name;
 	}

@@ -19,7 +19,7 @@ public class Tagger {
 	private static SimpleTagger3 m_tagger;
 	
 	/**
-	 * Initiate the tagger
+	 * Initiates the tagger
 	 * @param taggerHomdir
 	 * @throws Exception
 	 */
@@ -29,9 +29,9 @@ public class Tagger {
 	}
 	
 	/**
-	 * Tagging a string
+	 * Tags a string
 	 * @param str
-	 * @return
+	 * @return list of tagged sentences
 	 * @throws Exception
 	 */
 	private static List<Sentence> getTaggedSentences(String str) throws Exception  {
@@ -39,9 +39,9 @@ public class Tagger {
 	}
 	
 	/**
-	 * Get the most probable lemma, supports ngrams
+	 * Gets the most probable lemma, supports ngrams
 	 * @param str
-	 * @return Set - containing the most probable lemma - a single string
+	 * @return a set - containing the most probable lemma - a single string
 	 * @throws Exception
 	 */
 	public static Set<String>  getTaggerLemmas(String str) throws Exception{
@@ -61,9 +61,10 @@ public class Tagger {
 	 * This function is not in use,
 	 * to support this functionality see ResponsaNewSystem.morphology.MorphLemmatizer
 	 * @param str
-	 * @return
+	 * @return set of lemmas
 	 * @throws Exception
 	 */
+	@Deprecated
 	public static Set<String>  getAllPossibleLemmas(String str) throws Exception{
 		HashSet<String> lemmas = new HashSet<String>();
 		return lemmas;

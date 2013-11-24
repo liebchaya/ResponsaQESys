@@ -1,9 +1,8 @@
 package search;
 
 /**
- * @author Chaya Liebeskind
- *
- * @since 03/07/2011
+ * Query Generation Exception
+ * @author HZ
  */
 @SuppressWarnings("serial")
 public class QueryGenerationException extends Exception

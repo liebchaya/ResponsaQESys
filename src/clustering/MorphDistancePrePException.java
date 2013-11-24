@@ -4,9 +4,8 @@
 package clustering;
 
 /**
- * @author Chaya Liebeskind
- *
- * @since 08/07/2011
+ * Morph Distance Preprocessing Exception
+ * @author HZ
  */
 @SuppressWarnings("serial")
 

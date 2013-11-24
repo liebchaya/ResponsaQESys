@@ -2,8 +2,19 @@ package obj;
 
 import java.util.Comparator;
 
+/**
+ * Weighted term comparator
+ * @author HZ
+ *
+ */
 public class SortByWeightName implements Comparator<WeightedTerm> {
 
+	/**
+	 * Comparison function
+	 * @param arg0 weighted term
+	 * @param arg1 weighted term
+	 * @return Double.compare
+	 */
 	public int compare(WeightedTerm arg0, WeightedTerm arg1) {
 		
 		if (Double.compare(arg1.weight(),arg0.weight())!=0)

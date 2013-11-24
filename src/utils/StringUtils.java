@@ -3,13 +3,17 @@ package utils;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Utilities for string treatment
+ * @author HZ
+ *
+ */
 public class StringUtils {
 
 	/**
-	 * Enable search for quotes
-	 * 
+	 * Enables search for quotes
 	 * @param str
-	 * @return
+	 * @return formated string
 	 */
 	public static String fixQuateForSearch(String str) {
 		String newStr = str;
@@ -19,10 +23,9 @@ public class StringUtils {
 	}
 	
 	/**
-	 * Clean string after annotation
-	 * 
-	 * @param str
-	 * @return
+	 * Cleans string after annotation
+	 * @param term
+	 * @return formated string
 	 */
 	 public static String fixAnnotatedTerm(String term){
 			String newTerm=term;
@@ -37,9 +40,8 @@ public class StringUtils {
 
 	/**
 	 * Validates if input String is a number
-	 * 
 	 * @param in
-	 * @return
+	 * @return true/false
 	 */
 	public static boolean checkIfNumber(String in) {
 		try {
@@ -50,6 +52,11 @@ public class StringUtils {
 		return true;
 	}
 	
+	/**
+	 * Converts a string ([,,...]) to a set
+	 * @param str
+	 * @return a set of strings
+	 */
 	public static HashSet<String> convertStringToSet(String str){
 		HashSet<String> set = new HashSet<String>();
 		for(String s:str.split(",")){
@@ -60,6 +67,11 @@ public class StringUtils {
 		return set;
 	}
 	
+	/**
+	 * Converts a set to a string ([,,...])
+	 * @param set
+	 * @return converted string
+	 */
 	public static String convertSetToString(Set<String> set){
 		String str = "[";
 		for(String s:set){

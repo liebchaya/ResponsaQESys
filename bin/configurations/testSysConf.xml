@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+ <!DOCTYPE page [
+
+
+<!-- CHAYA DIRECTORY -->
+
+<!ENTITY main-dir "C:/QESys/">
+<!ENTITY indexes-dir "C:/ResponsaSys/indexes/">
+<!ENTITY experiment-name "QESys">
+<!ENTITY tagger-dir "C:/projects_ws/Tagger/">   
+
+]>
+
+ 
+<configuration>
+
+<module name="Experiment">
+	<param name="main-dir">&main-dir;</param>
+	<param name ="raw-terms-file">targetTerms.txt</param>
+	<param name ="wiktionary-file">wikiRel</param>
+	<param name="old-index">&indexes-dir;/oldResponsa</param>
+	<param name="database-name">judgmentssys</param>
+	
+</module>
+
+<module name="FO">
+	<param name="stat-scorer">fo.scorers.DiceScorer</param>
+	<param name="feature-type">Surface</param>
+	<param name="ngrams-index">&indexes-dir;/responsaNgrams</param>
+</module>
+
+<module name="Clustering">
+	<param name="tagger-dir">&tagger-dir;</param>
+	<param name="top-num">50</param>
+</module>
+
+<module name="DataGeneration">
+	<param name="modern-index">&indexes-dir;/responsaNgrams</param>
+	<param name="old-ngrams-file">50</param>
+	<param name="modernJewish-ngrams-file">&out-dir;</param>
+	<param name="clusters-dir">&out-dir;</param>
+</module>
+
+<module name="logging">
+	<param name="experiment-name">&experiment-name;</param>
+	<param name="main-output-dir">&out-dir;</param>
+	<param name="allow-relative-paths">TRUE</param>
+	<param name="logger-level">INFO</param>
+	<param name="console-logger-level">INFO</param>
+	<param name="log-layout">%d{HH:mm:ss} %p %m%n</param>
+	<param name="run-mode">DEBUG</param>
+	<param name="write-log-file">TRUE</param>
+	<param name="files-to-copy"></param>
+	<param name="files-to-copy-after-run"></param>
+	<param name="show-caller-info">true</param>
+	<param name="folders-to-create">RelatedTerms</param>
+	<param name="__mailer-module">mailer</param>
+	<param name="log-file-max-size">500MB</param>
+</module>
+
+
+</configuration>

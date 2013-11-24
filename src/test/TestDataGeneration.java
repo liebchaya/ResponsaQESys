@@ -34,7 +34,7 @@ public class TestDataGeneration {
 		
 		TargetTerm2Id.loadTargetTerm2IdMapping(new File(morphTargetTermFile));
 		NgramsDataGeneration ngramsGenerator = new NgramsDataGeneration(oldIndex,ngramsIndex,modernIndex);
-		ngramsGenerator.generateDataFiles(outputDir, morphTargetTermFile, oldNgramsFileName, modernJewishNgramsFileName, maxN);
+//		ngramsGenerator.generateDataFiles(outputDir, morphTargetTermFile, oldNgramsFileName, modernJewishNgramsFileName, maxN);
 
 	}
 

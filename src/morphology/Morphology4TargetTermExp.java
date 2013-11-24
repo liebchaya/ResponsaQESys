@@ -1,3 +1,6 @@
+/**
+ * Morphology nice package
+ */
 package morphology;
 
 import java.io.BufferedReader;
@@ -12,7 +15,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.FSDirectory;
 
 /**
- * Generates common morphology prefixes for target term expressions
+ * Common morphology prefixes for target term expressions' generation
  * @author HZ
  *
  */
@@ -21,10 +24,10 @@ public class Morphology4TargetTermExp {
 	public static String[] prefixes = {"מ", "ש", "ה", "ו", "כ", "ל" , "ב", "ומ", "וש", "וה", "וכ", "ול" , "וב"};
 
 	/**
-	 * Generate the target term's morphological variants, file name should end with "_orig.txt" 
-	 * @param targetTermFile - original target terms' list
-	 * @param index - in order to avoid complex queries with terms that don't appear in the corpus
-	 * @return String - re-formated target terms' file with morphology prefixes
+	 * Generates the target term's morphological variants, file name should end with "_orig.txt" 
+	 * @param targetTermFile original target terms' list
+	 * @param index in order to avoid complex queries with terms that don't appear in the corpus
+	 * @return String re-formated target terms' file with morphology prefixes
 	 * @throws IOException
 	 */
 	public static String generateMorphExpFile(String targetTermFile, String index) throws IOException {
