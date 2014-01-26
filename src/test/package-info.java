@@ -1,5 +1,5 @@
 /**
- * System test, including main program
+ * System tests
  * @author HZ
  * 
  */

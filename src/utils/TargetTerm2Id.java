@@ -38,10 +38,13 @@ import ac.biu.nlp.nlp.general.immutable.ImmutableSet;
 					break;
 				if(testFormat) {
 					String num = line.split("\t")[0];
+					System.out.println("key: "+line.trim().substring(num.length()+1) + " value: " + Integer.parseInt(num));
 					m_namesMap.put(line.trim().substring(num.length()+1), Integer.parseInt(num));
 				}
-				else 
+				else {
+					System.out.println("key????" + lineNum + "instead of " + line.split("\t")[0]);
 					m_namesMap.put(line.trim(), lineNum);
+				}
 				line = reader.readLine();
 				lineNum ++;
 			}

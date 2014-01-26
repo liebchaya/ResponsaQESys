@@ -8,12 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 import ac.biu.nlp.nlp.general.Utils;
 import ac.biu.nlp.nlp.general.file.RecursiveFileListIterator;
@@ -39,7 +36,7 @@ public class ResponsaDocReader extends DocReader
 	private String currDocText;
 	private String inputDir;
 	private Shoots shoots;
-	private String encoding = null;
+//	private String encoding = null;
 
 	/**
 	 * @param dir folder containing files to read
@@ -197,6 +194,7 @@ public class ResponsaDocReader extends DocReader
 		return tempStr;
 	}
 	
+	/*
 	private List<String> getNgrams(String content, int n){
 		LinkedList<String> ngrams = new LinkedList<String>();
 		StringTokenizer tokens = new StringTokenizer(content);
@@ -219,5 +217,6 @@ public class ResponsaDocReader extends DocReader
 		}
 		return ngrams;
 	}
+	*/
 }
 	

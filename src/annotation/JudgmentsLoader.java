@@ -66,24 +66,27 @@ public class JudgmentsLoader {
 	 * Generates a new input file with the suitable ids from the database
 	 * @param inputFile file with target terms
 	 * @param outputFile file with id+target term
+	 * @return first id that was added
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public void generateInputFile(File inputFile, File outputFile) throws IOException, SQLException{
+	public int generateInputFile(File inputFile, File outputFile) throws IOException, SQLException{
 		List<String> origTermsList = FileUtils.loadFileToList(inputFile);
 		HashMap<Integer, String> idTermsMap = m_sql.insertAndExtractInputFile(origTermsList);
-		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile,true));
 		List<Integer> mapKeys = new ArrayList<Integer>(idTermsMap.keySet());
 		Collections.sort(mapKeys);
+		int firstId = mapKeys.get(0);
 		for(int id:mapKeys)
 			writer.write(id + "\t" + idTermsMap.get(id) + "\n");
 		writer.close();
+		return firstId;
 	}
 
 	/**
 	 * Generates the first statistics extraction for judgment including wiktionary expansions
 	 * Input file format: starts with ngram, lemma, score, ancient/modern
-	 * Output file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id
+	 * Output file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id, generation
 	 * @param f statistics file (File name: target term id.dataClusters)
 	 * @param outputFolder judgments' folder
 	 */
@@ -94,19 +97,18 @@ public class JudgmentsLoader {
 		BufferedReader reader = new BufferedReader(new FileReader(f));
 		String target_term = f.getName().substring(0,f.getName().indexOf("_")); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+target_term+".dataGroups"), "CP1255"));
-		writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\n");
-		
+		writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\n");
 		// add wiktionary synonyms at the beginning of the annotation file
 		String target_term_desc = TargetTerm2Id.getStrDesc(Integer.parseInt(target_term));
 		for(String relTerm:m_wiktionary.getRelSet(target_term_desc, true, 1)){
 			int period = (m_ngramData.countOldPeriod(m_qg.generate(relTerm))>0?1:0);
 			// get the period of the related term
-			writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\n");
+			writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\n");
 		}
 		String line = reader.readLine();
 		line = reader.readLine(); // skip the first line
 		while(line != null) {
-			writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1]+"\t"+ line.split("\t")[3]+"\t-99\t-88\t-1\n");
+			writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1]+"\t"+ line.split("\t")[3]+"\t-99\t-88\t-1\t0\n");
 			line = reader.readLine();
 		}
 		reader.close();
@@ -135,11 +137,11 @@ public class JudgmentsLoader {
 				HashSet<String> wikiList = m_wiktionary.getRelSet(target_term_desc, true, 1);
 				if (!wikiList.isEmpty()){
 					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+id+".dataGroups"), "CP1255"));
-					writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\n");
+					writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\n");
 					for(String relTerm:wikiList){
 						int period = (m_ngramData.countOldPeriod(m_qg.generate(relTerm))>0?1:0);
 						// get the period of the related term
-						writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\n");
+						writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\n");
 					}
 					writer.close();
 				}
@@ -149,7 +151,7 @@ public class JudgmentsLoader {
 	}
 	
 	/**
-	 * Loads annotations to database
+	 * Loads annotations to database, only new annotations were judged
 	 * @param file (Input file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id)
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
@@ -161,12 +163,9 @@ public class JudgmentsLoader {
 		line = reader.readLine(); // skip the first line
 		int lineNum = 1;
 		int target_term_id = Integer.parseInt(file.getName().substring(0,file.getName().indexOf(".")));
-		// get the lemmas that were already annotated
-		int generation = m_sql.getGeneration(target_term_id);
+		System.out.println(file.getAbsolutePath());
 		while(line != null) {
-			// verify that this is a new annotation from the current step
-			if (isNewAnnoatation(target_term_id, line.split("\t")[1]))
-				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum, Integer.parseInt(line.split("\t")[3]),Integer.parseInt(line.split("\t")[2]),Integer.parseInt(line.split("\t")[4]),Integer.parseInt(line.split("\t")[5]));
+			m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, Integer.parseInt(line.split("\t")[6]), lineNum, Integer.parseInt(line.split("\t")[3]),Integer.parseInt(line.split("\t")[2]),Integer.parseInt(line.split("\t")[4]),Integer.parseInt(line.split("\t")[5]),true);
 			line = reader.readLine();
 			lineNum ++;
 		}
@@ -186,33 +185,55 @@ public class JudgmentsLoader {
 		int prev_exp_Id = m_sql.getLastExpansionId();
 		String encoding = utils.FileUtils.getFileEncoding(inputFile);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), encoding));
+		HashMap<Integer,Integer> idGenerationMap = new HashMap<Integer, Integer>();
 		String line = reader.readLine();
 		while (line != null){
 			String[] tokens = line.split("\t");
-			int generation = m_sql.getGeneration(Integer.parseInt(tokens[0]))+1;
-			m_sql.insertExpansion(tokens[1], tokens[0], Integer.parseInt(tokens[2]), generation, Integer.parseInt(tokens[3]));
+			int target_term_id = Integer.parseInt(tokens[0]);
+			int generation = -1;
+			if(idGenerationMap.containsKey(target_term_id))
+				generation = idGenerationMap.get(target_term_id);
+			else {
+				generation = m_sql.getGeneration(target_term_id)+1;
+				idGenerationMap.put(target_term_id, generation);
+			}
+			if (!tokens[1].trim().isEmpty())
+				m_sql.insertExpansion(tokens[1], tokens[0], Integer.parseInt(tokens[2]), generation, Integer.parseInt(tokens[3]));
 			line = reader.readLine();
 		}
 		reader.close();
 		
 		// generate the expansion file
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+		m_dupExpMap = new HashMap<Integer, Integer>();
+		HashMap<String,Integer> convertMap = new HashMap<String, Integer>();
+		
 		HashMap<Integer, Pair<Integer,String>> expMap = m_sql.getExpansions(prev_exp_Id+1);
 		for(int id:expMap.keySet()){
 			String terms = expMap.get(id).value();
-			HashSet<String> termsSet = StringUtils.convertStringToSet(terms);
-			String query = "";
-			for(String t:termsSet)
-				query = query + t + "\t";
-			writer.write(id + "\t" + query.trim() + "\n");
+			
+			if(!convertMap.containsKey(terms)){
+				convertMap.put(terms, id);
+				writer.write(id + "\t" + terms + "\n");
+			}
+			else
+				m_dupExpMap.put(id, convertMap.get(terms));
+//			HashSet<String> termsSet = StringUtils.convertStringToSet(terms);
+//			String query = "";
+//			for(String t:termsSet)
+//				query = query + t + "\t";
+//			writer.write(id + "\t" + query.trim() + "\n");
+			
 		}
+		System.out.println("dupMap: " + m_dupExpMap);
 		writer.close();
 		return expMap;
 	}
 	
+	
 	/**
 	 * Exports the statistics extraction data for judgment (assign previous annotations)
-	 * Output file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id
+	 * Output file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id, generation
 	 * @param file (Input file format: starts with ngram, lemma, score, ancient/modern, expansion id)
 	 * @param outputFolder
 	 * @throws IOException
@@ -225,20 +246,29 @@ public class JudgmentsLoader {
 		String line = reader.readLine();
 		line = reader.readLine(); // skip the first line
 		int lineNum = 1;
+		HashMap<String, Integer> lemmaGroups = m_sql.getLemmas(target_term_id);
+		HashMap<String, Integer> resultGroups = m_sql.getResults(target_term_id);
+		HashSet<Integer> prevGroups = new HashSet<Integer>();
+		int generation = m_sql.getGeneration(target_term_id);
 		while(line != null) {
-			int period = (Integer.parseInt(line.split("\t")[3])>0?1:0);
-			Pair<Integer, Integer> annoPair = getAnnotation(target_term_id,line.split("\t")[0],line.split("\t")[1]);
+			Pair<Integer, Integer> annoPair = getAnnotation(resultGroups,lemmaGroups,line.split("\t")[0],line.split("\t")[1]);
+			// positive judgment with group id
 			if (annoPair.value()>-1){
-				int maxPeriod = m_sql.getMaxPeriod(target_term_id, annoPair.value());
-				if (maxPeriod == 1 || period == 1){
-					m_sql.updateGroupAnnotations(target_term_id, annoPair.value());
-					period = 1;
-				}
+				prevGroups.add(annoPair.value());
+				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false);
 			}
-			writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1] + "\t" + period + "\t" + annoPair.key() + "\t" + annoPair.value() + "\t" + Integer.parseInt(line.split("\t")[8]) + "\n");
+			// already seen negative judgment
+			else if (annoPair.key()==0){
+				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false);
+			}
+			// write only non-annotated values
+			else
+				writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1] + "\t" + line.split("\t")[3] + "\t" + annoPair.key() + "\t" + annoPair.value() + "\t" + Integer.parseInt(line.split("\t")[8]) + "\t" + generation + "\n");
 			line = reader.readLine();
 			lineNum ++;
 		}
+		for(int group_id:prevGroups)
+			m_sql.updateGroupAnnotations(target_term_id, group_id);
 		reader.close();
 		writer.close();
 	}
@@ -259,9 +289,12 @@ public class JudgmentsLoader {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outpuFolder+ "/" + targetTermId +"_Dice.dataClusters.txt"));
 		ArrayList<Pair<Integer,BufferedReader>> readersList = new ArrayList<Pair<Integer,BufferedReader>>();
 		for (int id:idList) {
-			File idFile = new File(inputFolder+ "/" + id +"_Dice.dataClusters.txt");
+			int curId = id;
+			if(m_dupExpMap.containsKey(id))
+				curId = m_dupExpMap.get(id);
+			File idFile = new File(inputFolder+ "/" + curId +"_Dice.dataClusters.txt");
 			if(idFile.exists()) {
-				BufferedReader reader = new BufferedReader(new FileReader(inputFolder+ "/" + id +"_Dice.dataClusters.txt"));
+				BufferedReader reader = new BufferedReader(new FileReader(inputFolder+ "/" + curId +"_Dice.dataClusters.txt"));
 				readersList.add(new Pair<Integer,BufferedReader>(id,reader));
 			}
 		}
@@ -301,13 +334,35 @@ public class JudgmentsLoader {
 	 */
 	public void printUpdatedGroupsData(String outputFolder, String fileName) throws SQLException, IOException{
 		int target_term_id = Integer.parseInt(fileName.substring(0, fileName.indexOf("_")));
-		HashMap<Integer, String> groupsData = m_sql.GetGroupsData(target_term_id);
+		HashMap<Integer, String> groupsData = m_sql.getGroupsData(target_term_id);
 		if(!groupsData.isEmpty()){
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+target_term_id+".groups"), "CP1255"));
 			SortedSet<Integer> keys = new TreeSet<Integer>(groupsData.keySet());
 			for(int i:keys)
 				writer.write(i + "\t" + groupsData.get(i) + "\n");
 			writer.close();
+		}
+		
+	}
+	
+	/**
+	 * Prints groups data to a file
+	 * @param outputFolder
+	 * @param fileName for the id of the target term
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public void printAllGroupsData(String outputFolder) throws SQLException, IOException{
+		HashMap<Integer, String> targetTerms = m_sql.getTargetTermList();
+		for(int target_term_id:targetTerms.keySet()){
+			HashMap<Integer, String> groupsData = m_sql.getGroupsData(target_term_id);
+			if(!groupsData.isEmpty()){
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+target_term_id+".groups"), "CP1255"));
+				SortedSet<Integer> keys = new TreeSet<Integer>(groupsData.keySet());
+				for(int i:keys)
+					writer.write(i + "\t" + groupsData.get(i) + "\n");
+				writer.close();
+			}
 		}
 		
 	}
@@ -342,15 +397,18 @@ public class JudgmentsLoader {
 	/**
 	 * Gets previous annotation
 	 * Implements the matching between seen and unseen candidates
+	 * @param resultGroups map of previously annotated results of a certain target term
+	 * @param lemmaGroups map of previously annotated lemmas of a certain target term
+	 * @param result
+	 * @param lemma
 	 * @return Pair: annotation or -99 (if it's a new annotation)
 	 * 				 group or -1
 	 * @throws SQLException 
 	 */
-	private Pair<Integer,Integer> getAnnotation(int target_term_id, String result, String lemma) throws SQLException{
+	private Pair<Integer,Integer> getAnnotation(HashMap<String, Integer> resultGroups, HashMap<String,Integer> lemmaGroups, String result, String lemma) throws SQLException{
 		int annotation = -99;
 		int group = -1;
 		HashSet<String> lemmaInput = StringUtils.convertStringToSet(lemma);
-		HashMap<String, Integer> lemmaGroups = m_sql.getLemmas(target_term_id);
 		for(String lem:lemmaGroups.keySet()){
 			for(String l: lemmaInput)
 				if (StringUtils.convertStringToSet(lem).contains(l)){
@@ -358,7 +416,6 @@ public class JudgmentsLoader {
 					return new Pair<Integer, Integer>(annotation,lemmaGroups.get(lem));
 				}
 		}
-		HashMap<String,Integer> resultGroups = m_sql.getResults(target_term_id);
 		MWEDistance dist = new MWEDistance();
 		for(String res:resultGroups.keySet()){
 			if (dist.distance(res, result) == 0){
@@ -370,29 +427,38 @@ public class JudgmentsLoader {
 		return new Pair<Integer, Integer>(annotation,group);
 	}
 	
+//	/**
+//	 * Checks whether the annotation already exist in the database
+//	 * @param target_term_id
+//	 * @param lemma
+//	 * @return boolean
+//	 * @throws SQLException
+//	 */
+//	private boolean isNewAnnoatation(int target_term_id, String lemma) throws SQLException{
+//		HashSet<String> allLemmas = new HashSet<String>();
+//		HashSet<String> lemmaSet = m_sql.getAnnotatedLemmas(target_term_id);
+//		for(String lem:lemmaSet){
+//			allLemmas.addAll(StringUtils.convertStringToSet(lem));
+//		}
+//		HashSet<String> lemmaInput = StringUtils.convertStringToSet(lemma);
+//		for(String lem: lemmaInput)
+//			if (allLemmas.contains(lem))
+//				return false;
+//		return true;
+//		
+//	}
+	
 	/**
-	 * Checks whether the annotation already exist in the database
-	 * @param target_term_id
-	 * @param lemma
-	 * @return boolean
-	 * @throws SQLException
+	 * Gets duplicated expansions' mapping to avoid re-querying duplicated expansions
+	 * @return duplicates' mapping
 	 */
-	private boolean isNewAnnoatation(int target_term_id, String lemma) throws SQLException{
-		HashSet<String> allLemmas = new HashSet<String>();
-		HashSet<String> lemmaSet = m_sql.getAnnotatedLemmas(target_term_id);
-		for(String lem:lemmaSet){
-			allLemmas.addAll(StringUtils.convertStringToSet(lem));
-		}
-		HashSet<String> lemmaInput = StringUtils.convertStringToSet(lemma);
-		for(String lem: lemmaInput)
-			if (allLemmas.contains(lem))
-				return false;
-		return true;
-		
+	public HashMap<Integer,Integer> getDuplicatedExpansionsMap(){
+		return m_dupExpMap;
 	}
 	
 	private Wiktionary m_wiktionary;
 	private NgramData m_ngramData; 
 	private QueryGenerator m_qg;
+	private HashMap<Integer,Integer> m_dupExpMap = null;
 	private SQLAccess m_sql;
 }

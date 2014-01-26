@@ -1,13 +1,13 @@
-package index;
+package run;
 
-import hebmorph.lemmafilters.FilterValue;
+import index.DocReader;
+import index.Indexer;
 
 import java.io.File;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleAnalyzerWrapper;
 import org.apache.lucene.util.Version;
@@ -17,20 +17,24 @@ import ac.biu.nlp.nlp.general.configuration.ConfigurationParams;
 
 
 
-
-	/**
- * @author Chaya Liebeskind
- *
- * @since 03/05/2011
+/**
+ * Main class for indexing 2 corpura simultaneously (with Lucene)
+ * @author HZ
  */
 public class Index2Corpora
 {		
 	/**
-	 * @param args
+	 * Indexes two corpura to one index
+	 * @param args configuration file (index directory, 2 corpus directories and 2 document readers ({@link DocReader}))
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception
 	{
+		
+		if(args.length != 1) {
+            System.err.println("Usage: Configuration file <XML-FILE>");
+            System.exit(-1);
+		}
 		
 		long start = new Date().getTime();
 		long end = new Date().getTime();
@@ -50,13 +54,10 @@ public class Index2Corpora
 		String docReader2Class =params.get("docReader2-class");
 		cls = Class.forName(docReader2Class);
 		DocReader reader2 = (DocReader) cls.getDeclaredConstructor(File.class).newInstance(corpus2Dir);
-		String analyzerClass =params.get("analyzer-class");
-		cls = Class.forName(analyzerClass);
-		Analyzer analyzer = (Analyzer) cls.getDeclaredConstructor(Version.class).newInstance(Version.LUCENE_31);
-		Float filterPercent = params.getFloat("filter-percent");
-		FilterValue.filterPercent = filterPercent;
+//		String analyzerClass =params.get("analyzer-class");
+//		cls = Class.forName(analyzerClass);
+//		Analyzer analyzer = (Analyzer) cls.getDeclaredConstructor(Version.class).newInstance(Version.LUCENE_31);
 
-		
 		File indexDir = new File(indexFolder);
 		Indexer manager = new Indexer();
 		Set<Indexer.DocField> fields = new HashSet<Indexer.DocField>();
@@ -67,11 +68,8 @@ public class Index2Corpora
 		fields.add(Indexer.DocField.SOURCE);
 		ShingleAnalyzerWrapper shingleAnalyzer = new ShingleAnalyzerWrapper(new WhitespaceAnalyzer(Version.LUCENE_31), 2);
 		shingleAnalyzer.setOutputUnigrams(true);
-//		MilaMorphAnalyzer analyzer = new MilaMorphAnalyzer(Version.LUCENE_31);
-//		manager.index(analyzer, reader, indexDir , fields, false, true);
 		manager.index2Corpora(shingleAnalyzer, reader1, reader2, indexDir , fields, false, true);
-		
-		analyzer.close();
+		shingleAnalyzer.close();
 		
 		end = new Date().getTime();
 		System.out.println("total run time : "+(end-start)/1000+" seconds"+"("+(end-start)/60000+" minutes)");

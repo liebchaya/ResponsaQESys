@@ -90,6 +90,7 @@ public class ClusteringGeneration {
 	 * @param statFile
 	 * @throws MorphDistancePrePException
 	 */
+	@Deprecated
 	private void loadTargetTermData(File statFile) throws MorphDistancePrePException {
 		 m_inputTerms = m_morphPre.loadDataFile(statFile.getName(), m_confName);
 	}

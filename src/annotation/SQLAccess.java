@@ -80,11 +80,14 @@ public class SQLAccess {
 	 * @param position
 	 * @param judgement
 	 * @param period
+	 * @param result_group
+	 * @param expasion_id
+	 * @param isNew
 	 * @throws SQLException
 	 */
-	public void insertAnnotation(String result,String lemma, int target_term_id, int generation, int position, int judgement, int period, int result_group, int expasion_id) throws SQLException{
+	public void insertAnnotation(String result,String lemma, int target_term_id, int generation, int position, int judgement, int period, int result_group, int expasion_id, Boolean isNew) throws SQLException{
 	    PreparedStatement preparedStatement = m_connection
-        .prepareStatement("insert into annotations(id,result,lemma,target_term_id,generation,position,judgement,period,result_group,expansion_id,created_at) values (null, ?, ?, ?, ?, ? , ?, ?, ?, ?, null)");
+        .prepareStatement("insert into annotations(id,result,lemma,target_term_id,generation,position,judgement,period,result_group,expansion_id,new_anno,created_at) values (null, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?, null)");
 		
 	      // Parameters start with 1
 	      preparedStatement.setString(1, result);
@@ -96,6 +99,8 @@ public class SQLAccess {
 	      preparedStatement.setInt(7, period);
 	      preparedStatement.setInt(8, result_group);
 	      preparedStatement.setInt(9, expasion_id);
+	      preparedStatement.setBoolean(10, isNew);
+	      System.out.println(preparedStatement.toString());
 	      preparedStatement.executeUpdate();
 	}
 	
@@ -121,24 +126,24 @@ public class SQLAccess {
 	      preparedStatement.executeUpdate();
 	}
 	
-	/**
-	 * Gets previously annotated lemmas for a target term
-	 * @param target_term_id
-	 * @return a lemma set
-	 * @throws SQLException
-	 */
-	public HashSet<String> getAnnotatedLemmas(int target_term_id) throws SQLException{
-		// Select all annotated candidates for the target term
-		HashSet<String> lemmaSet = new HashSet<String>();
-	      PreparedStatement preparedStatement = m_connection
-	      .prepareStatement("select lemma from annotations where target_term_id= ? ; ");
-	      preparedStatement.setInt(1, target_term_id);
-	      ResultSet rs = preparedStatement.executeQuery();
-	      while (rs.next()) 
-	    	  lemmaSet.add(rs.getString("lemma"));
-	      rs.close();
-	      return lemmaSet;
-	}
+//	/**
+//	 * Gets previously annotated lemmas for a target term
+//	 * @param target_term_id
+//	 * @return a lemma set
+//	 * @throws SQLException
+//	 */
+//	public HashSet<String> getAnnotatedLemmas(int target_term_id) throws SQLException{
+//		// Select all annotated candidates for the target term
+//		HashSet<String> lemmaSet = new HashSet<String>();
+//	      PreparedStatement preparedStatement = m_connection
+//	      .prepareStatement("select lemma from annotations where target_term_id= ? ; ");
+//	      preparedStatement.setInt(1, target_term_id);
+//	      ResultSet rs = preparedStatement.executeQuery();
+//	      while (rs.next()) 
+//	    	  lemmaSet.add(rs.getString("lemma"));
+//	      rs.close();
+//	      return lemmaSet;
+//	}
 	
 	/**
 	 * Gets full groups list from the database
@@ -148,7 +153,7 @@ public class SQLAccess {
 	 * @throws SQLException
 	 */
 	@Deprecated
-	public HashMap<Integer, String> GetGroupsDataMax(int target_term_id) throws SQLException
+	public HashMap<Integer, String> getGroupsDataMax(int target_term_id) throws SQLException
 	{
 		String sql = "select MAX(mlen), result, result_group, period, target_term_id from ( " +
 			"select result, result_group, period, target_term_id, LENGTH(result) as mlen " +
@@ -169,7 +174,7 @@ public class SQLAccess {
 	 * @return id-group map
 	 * @throws SQLException
 	 */
-	public HashMap<Integer, String> GetGroupsData(int target_term_id) throws SQLException
+	public HashMap<Integer, String> getGroupsData(int target_term_id) throws SQLException
 	{
 		String sql = "select result, result_group, MAX(period) as m_period, target_term_id, REPLACE(GROUP_CONCAT(result SEPARATOR ' '),'] [',',')" + 
 					 " as mlen from annotations where result_group > -1 and target_term_id = ?" + 
@@ -189,7 +194,7 @@ public class SQLAccess {
 	 * @throws SQLException
 	 */
 	@Deprecated
-	public List<Pair<String, String>> GetThesaurusDataMax(int target_term_id) throws SQLException{
+	public List<Pair<String, String>> getThesaurusDataMax(int target_term_id) throws SQLException{
 		String sql = "SELECT MAX( mlen ) , result as newRes, result_group, target_term_id, COALESCE( expansion, target_term ) as te "+
 					 "FROM (SELECT annotations.result, annotations.result_group, annotations.target_term_id, annotations.expansion_id, expansions.expansion, expansions.id, target_terms.target_term, target_terms.id AS tid, LENGTH( annotations.result ) AS mlen " +
 					 "FROM annotations LEFT JOIN expansions ON annotations.expansion_id = expansions.id "+
@@ -281,17 +286,18 @@ public class SQLAccess {
 	}
 	
 	/**
-	 * Updates the group's period to be ancient if it was modern
+	 * Updates the group's period to be max period (converts modern to ancient if necessary)
 	 * @param target_term_id
 	 * @param result_group
 	 * @throws SQLException
 	 */
 	public void updateGroupAnnotations(int target_term_id, int result_group) throws SQLException{
-	    PreparedStatement preparedStatement = m_connection
-      .prepareStatement("update annotations set period=1 where result_group=? and target_term_id=?;");
-	      // Parameters start with 1
+		 PreparedStatement preparedStatement = m_connection
+	      .prepareStatement("UPDATE annotations SET period = (SELECT selected_value FROM (SELECT MAX(period) AS selected_value FROM annotations WHERE result_group = ? and target_term_id = ?) AS sub_selected_value) WHERE target_term_id = ? and result_group = ?");
 	      preparedStatement.setInt(1, result_group);
 	      preparedStatement.setInt(2, target_term_id);
+	      preparedStatement.setInt(3, target_term_id);
+	      preparedStatement.setInt(4, result_group);
 	      preparedStatement.executeUpdate();
 	}
 	
@@ -377,7 +383,7 @@ public class SQLAccess {
 	      .prepareStatement("select MAX(generation) from expansions where target_term_id= ? ; ");
 	      preparedStatement.setInt(1, target_term_id);
 	      ResultSet rs = preparedStatement.executeQuery();
-	      int generation = 0;
+	      int generation = -1;
 	      if (rs.next())
 	      	generation = rs.getInt(1);
 	      rs.close();
@@ -459,27 +465,6 @@ public class SQLAccess {
 	      
 	}
 	
-	/**
-	 * Get max period 
-	 * @param target_term_id
-	 * @param result_group
-	 * @return target term id
-	 * @throws SQLException 
-	 */
-	public int getMaxPeriod(int target_term_id, int result_group) throws SQLException{
-		// Select
-	      PreparedStatement preparedStatement = m_connection
-	      .prepareStatement("select MAX(period) from annotations where target_term_id= ? and result_group= ? ; ");
-	      preparedStatement.setInt(1, target_term_id);
-	      preparedStatement.setInt(2, result_group);
-	      ResultSet rs = preparedStatement.executeQuery();
-	      int id = 0;
-	      if (rs.next())
-	      	id = rs.getInt(1);
-	      rs.close();
-	      return id;  
-	}
-
 	
 	 private Connection m_connection = null;
 	 private String m_databaseName;

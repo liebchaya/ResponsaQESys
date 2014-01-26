@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+ <!DOCTYPE page [
+
+<!-- QA-SRV
+
+<!ENTITY Workspace "xxx">
+<!ENTITY work-dir "E:\cygwin\home\chaya\ResponsaNew\indexes">
+<!ENTITY experiment-name "IndexTagger">
+<!ENTITY out-dir "E:\cygwin\home\chaya\ResponsaNew\output">
+<!ENTITY index "IndexTagger">
+<!ENTITY corpus-folder "E:\cygwin\home\chaya\ResponsaCorpus">   
+
+-->
+
+<!-- CHAYA HOME -->
+
+<!ENTITY workspace "D:\MyWorkspace">
+<!ENTITY work-dir "C:\ResponsaSys\indexes">
+<!ENTITY experiment-name "modernTrigrams">
+<!ENTITY out-dir "C:\ResponsaSys\output">
+<!ENTITY index "modernJewishNgramsNew"> 
+<!ENTITY corpus-folder "C:\Documents and Settings\HZ\Desktop\ModernJewish">  
+<!-- ENTITY corpus-folder "C:\TestCorpus" -->
+
+]>
+
+ 
+<configuration>
+
+<module name="Experiment">
+	<param name="index-dir">&work-dir;\&index;</param>
+	<param name="__index-dir">C:\TestIndex\&index;</param>
+	<param name="corpus-dir">&corpus-folder;</param>
+	<param name="docReader-class">index.ModernJewishDocReader</param>
+</module>
+
+
+
+</configuration>

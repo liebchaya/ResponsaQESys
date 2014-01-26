@@ -66,7 +66,7 @@ public class ModernJewishDocReader extends DocReader
 					encoding = FileUtils.getFileEncoding(currFile);
 				currDocText = FileUtils.loadFileToString(currFile,encoding);
 				currDocText = currDocText.replaceAll("[\\x07\t\f\n-]", " ");
-				currDocText = currDocText.replaceAll("[^[\u0590-\u05FF]\'\\s\"]", "");
+				currDocText = currDocText.replaceAll("[^אבגדהלוזחטיכגמנסעפצקרשתץףךםןת\'\\s\"]", "");
 				termIter = Utils.arrayToCollection(currDocText.split(SPACE),words).iterator();
 				if (currReader != null)
 					currReader.close();

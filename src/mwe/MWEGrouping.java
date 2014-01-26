@@ -2,6 +2,7 @@ package mwe;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,8 +34,8 @@ public class MWEGrouping {
 	 * @throws IOException
 	 */
 	private HashSet<String> loadDataFile(String fileName, double MWEthreshold, boolean filterModern) throws IOException{
-		m_idMap = new HashMap<String, Integer>();
-		m_dataMap = new HashMap<String, String>();
+		m_idMap = new HashMap<String, Integer>(); // key: result, value: line number
+		m_dataMap = new HashMap<String, String>(); // key: result, value: result's details
 		HashSet<String> keys = new HashSet<String>();
 		BufferedReader reader = new BufferedReader(new FileReader(fileName));
 		// skip the headline
@@ -70,6 +71,7 @@ public class MWEGrouping {
 	public void groupMWEfile(String inputFile, double threshold, boolean filterModern ) throws IOException{
 		HashSet<String> strings2group = loadDataFile(inputFile, threshold, filterModern);
 		Set<Set<String>> groups = groupMWE(strings2group);
+		System.out.println("Finish grouping file: "+inputFile);
 		printMWEgroups(inputFile.replace(".dataClusters.txt", ".dataGroups.txt"), groups);
 	}
 	
@@ -92,7 +94,9 @@ public class MWEGrouping {
 	 * @throws IOException
 	 */
 	private void printMWEgroups(String groupsFileName, Set<Set<String>> groups) throws IOException{
-		BufferedWriter writer = new BufferedWriter(new FileWriter(groupsFileName));
+		File groupsFile = new File(groupsFileName);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(groupsFile));
+		
 		HashMap<Integer,String> groupsMapData = new HashMap<Integer, String>();
 		for (Set<String> group:groups){
 			int minGroupId = Integer.MAX_VALUE;
@@ -110,6 +114,7 @@ public class MWEGrouping {
 				}
 			}
 			String tokens[] = m_dataMap.get(selectedStr).split("\t");
+//			groupsMapData.put(minGroupId, StringUtils.convertSetToString(groupStrings) + "\t"+ StringUtils.convertSetToString(lemmaStrings) + "\t" + tokens[1]  + "\t" + oldPeriodCount +  "\t" + tokens[3] + "\t" + tokens[4] + "\t" + tokens[5]+ "\t" + tokens[6] + "\t" + groupsFile.getName().substring(0,groupsFile.getName().indexOf("_")));
 			groupsMapData.put(minGroupId, StringUtils.convertSetToString(groupStrings) + "\t"+ StringUtils.convertSetToString(lemmaStrings) + "\t" + tokens[1]  + "\t" + oldPeriodCount +  "\t" + tokens[3] + "\t" + tokens[4] + "\t" + tokens[5]+ "\t" + tokens[6] + "\t" + tokens[7]);
 		}
 		writer.write("Candidate\tLemma\tScore\tOld Period Count\tAdded Union\tAdded Intersection\tModern Intersection\tMWE\tExp Id\n");

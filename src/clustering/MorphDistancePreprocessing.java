@@ -193,6 +193,7 @@ public class MorphDistancePreprocessing {
 	 * @return	map of morphological data
 	 * @throws MorphDistancePrePException
 	 */
+	@Deprecated
 	public Map<String,Double> loadDataFile(LinkedList<WeightedTerm> termsList, boolean insertScore) throws MorphDistancePrePException{
 		m_unigramsFreq = new HashMap<String, Integer>();
 		m_dataMap = new HashMap<String, Set<String>>();

@@ -69,9 +69,13 @@ public class NgramsTargetTermRepresentation extends TargetTermRepresentation{
 		for(Pair<Integer,String> term:queries){
 			Query q = m_qg.generate(term.value());
 			System.out.println(term.key());
-//			System.out.println(TargetTerm2Id.getStrDesc(Integer.parseInt(term.key())));
+			System.out.println(term.value());
+			if(TargetTerm2Id.getStrDesc(term.key()).equals(null))
+				System.out.println(term.key());
 			termDocs.put(TargetTerm2Id.getStrDesc(term.key()), new ArrayList<ScoreDoc>(Arrays.asList(searcher.search(q,1000).scoreDocs)));
 		}
+		System.out.println("No null yet???");
+		System.out.println(termDocs);
 		return termDocs;
 		
 	}

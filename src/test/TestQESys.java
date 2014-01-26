@@ -110,7 +110,7 @@ public class TestQESys {
 			 */
 			// first we have to process the input file for new target terms
 			// insert the new terms to the database and get their ids in the system
-			jLoader.generateInputFile(new File(inputFolder+rawTermFile), new File(inputFolder+targetTermFile));
+			int firstId = jLoader.generateInputFile(new File(inputFolder+rawTermFile), new File(inputFolder+targetTermFile));
 			System.out.println("Finish loading new target terms");
 			
 			/**
@@ -119,7 +119,7 @@ public class TestQESys {
 			
 			TargetTerm2Id.loadTargetTerm2IdMapping(new File(inputFolder+targetTermFile));
 			// expand target terms with morphology prefixes
-			String expTargetTermFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(inputFolder+targetTermFile, ngramsIndex);
+			String expTargetTermFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(inputFolder+targetTermFile, ngramsIndex, firstId);
 	
 			// FO n-grams extraction - from ngrams index
 			targetRp = new NgramsTargetTermRepresentation(targetType, expTargetTermFile, ngramsIndex);
@@ -167,7 +167,8 @@ public class TestQESys {
 		File annotatedDir = new File(annotationsFolder);
 		if (annotatedDir.exists()) {
 			for(File f:annotatedDir.listFiles())
-				jLoader.loadAnnotations(f);
+				if(f.getAbsolutePath().endsWith(".dataGroups"))
+					jLoader.loadAnnotations(f);
 			System.out.println("FInish loading annotations");
 			
 			// insert expansions to database
@@ -183,7 +184,7 @@ public class TestQESys {
 			
 			TargetTerm2Id.loadTargetTerm2IdMapping(new File(expOutputFile.getAbsolutePath()));
 			// expand target terms with morphology prefixes
-			String expExpFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(expOutputFile.getAbsolutePath(), ngramsIndex);
+			String expExpFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(expOutputFile.getAbsolutePath(), ngramsIndex, 0);
 	
 			// FO n-grams extraction - from ngrams index
 			targetRp = new NgramsTargetTermRepresentation(targetType, expExpFile, ngramsIndex);
