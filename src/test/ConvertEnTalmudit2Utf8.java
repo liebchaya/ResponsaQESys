@@ -28,10 +28,11 @@ public class ConvertEnTalmudit2Utf8 {
 			String encoding = FileUtils.getFileEncoding(currFile);
 			String currDocText = FileUtils.loadFileToString(currFile,encoding);
 			currDocText = FileUtils.loadFileToString(currFile,encoding);
-			currDocText = currDocText.replaceAll("[\\x07\t\f\n-]", " ");
+//			currDocText = currDocText.replaceAll("[\\x07\t\f\n-]", " ");
+			currDocText = currDocText.replaceAll("[\\x07\t\f-]", " ");
 			currDocText = currDocText.replaceAll("[^אבגדהלוזחטיכגמנסעפצקרשתץףךםןת\'\\s\"]", "");
 			writer = new BufferedWriter(new FileWriter(outputDir+"\\"+currFile.getName().replace(".org", ".txt")));
-			writer.write(currDocText);
+			writer.write(currDocText+"\n");
 			writer.close();
 		}
 
