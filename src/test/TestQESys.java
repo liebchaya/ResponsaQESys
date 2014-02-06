@@ -169,85 +169,87 @@ public class TestQESys {
 			for(File f:annotatedDir.listFiles())
 				if(f.getAbsolutePath().endsWith(".dataGroups"))
 					jLoader.loadAnnotations(f);
-			System.out.println("FInish loading annotations");
+			System.out.println("Finish loading annotations");
 			
 			// insert expansions to database
 			// generate expansion input file
+			
 			File expInputFile = new File(inputFolder+"exp_raw.txt");
-			File expOutputFile = new File(expInputFile.getAbsolutePath().replace("_raw.txt", "_orig.txt"));
-			HashMap<Integer, Pair<Integer, String>> expMap = jLoader.generateExpansionsFile(expInputFile, expOutputFile);
-			System.out.println("Finish inserting expansions to the database");
-	//		
-			/**
-			 * step 5 - run statistical extraction over expansions
-			 */
-			
-			TargetTerm2Id.loadTargetTerm2IdMapping(new File(expOutputFile.getAbsolutePath()));
-			// expand target terms with morphology prefixes
-			String expExpFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(expOutputFile.getAbsolutePath(), ngramsIndex, 0);
-	
-			// FO n-grams extraction - from ngrams index
-			targetRp = new NgramsTargetTermRepresentation(targetType, expExpFile, ngramsIndex);
-			targetDocs = targetRp.extractDocsByRepresentation();
-			
-			String expOutputFolder = outputFolder+"exp/";
-			String expDirName = vectorExtractor.extractTargetTermVectors(targetDocs, targetType, new File(expOutputFolder));
-			
-			// cluster FO results
-			TargetTerm2Id.loadTargetTerm2IdMapping(new File(expExpFile));
-			
-			clsGen = new ClusteringGeneration(taggerDir,expDirName,topNum);
-			String expClustersDirName = clsGen.clusterDir(fileType, topNum);
-			
-			// generate clusters data
-			ngramsGenerator.generateDataFiles(expClustersDirName, expExpFile, oldNgramsFileName, modernJewishNgramsFileName, maxN, false);
-			
-			
-			/**
-			 * step 6 - merge files
-			 */
-			// merge generation results
-			HashMap<Integer,ArrayList<Integer>> mergingMap = new HashMap<Integer, ArrayList<Integer>>();
-			for(int id:expMap.keySet()){
-				int targetTermId = expMap.get(id).key();
-				if(mergingMap.containsKey(targetTermId))
-					mergingMap.get(targetTermId).add(id);
-				else {
-					ArrayList<Integer> idList = new ArrayList<Integer>();
-					idList.add(id);
-					mergingMap.put(targetTermId, idList);
+			if(!expInputFile.exists()) {
+				File expOutputFile = new File(expInputFile.getAbsolutePath().replace("_raw.txt", "_orig.txt"));
+				HashMap<Integer, Pair<Integer, String>> expMap = jLoader.generateExpansionsFile(expInputFile, expOutputFile);
+				System.out.println("Finish inserting expansions to the database");
+		//		
+				/**
+				 * step 5 - run statistical extraction over expansions
+				 */
+				
+				TargetTerm2Id.loadTargetTerm2IdMapping(new File(expOutputFile.getAbsolutePath()));
+				// expand target terms with morphology prefixes
+				String expExpFile = morphology.Morphology4TargetTermExp.generateMorphExpFile(expOutputFile.getAbsolutePath(), ngramsIndex, 0);
+		
+				// FO n-grams extraction - from ngrams index
+				targetRp = new NgramsTargetTermRepresentation(targetType, expExpFile, ngramsIndex);
+				targetDocs = targetRp.extractDocsByRepresentation();
+				
+				String expOutputFolder = outputFolder+"exp/";
+				String expDirName = vectorExtractor.extractTargetTermVectors(targetDocs, targetType, new File(expOutputFolder));
+				
+				// cluster FO results
+				TargetTerm2Id.loadTargetTerm2IdMapping(new File(expExpFile));
+				
+				clsGen = new ClusteringGeneration(taggerDir,expDirName,topNum);
+				String expClustersDirName = clsGen.clusterDir(fileType, topNum);
+				
+				// generate clusters data
+				ngramsGenerator.generateDataFiles(expClustersDirName, expExpFile, oldNgramsFileName, modernJewishNgramsFileName, maxN, false);
+				
+				
+				/**
+				 * step 6 - merge files
+				 */
+				// merge generation results
+				HashMap<Integer,ArrayList<Integer>> mergingMap = new HashMap<Integer, ArrayList<Integer>>();
+				for(int id:expMap.keySet()){
+					int targetTermId = expMap.get(id).key();
+					if(mergingMap.containsKey(targetTermId))
+						mergingMap.get(targetTermId).add(id);
+					else {
+						ArrayList<Integer> idList = new ArrayList<Integer>();
+						idList.add(id);
+						mergingMap.put(targetTermId, idList);
+					}
 				}
+				System.out.println(mergingMap);
+				String stepInputFolder = expClustersDirName;
+				String stepOutputFolder = expOutputFolder;
+				for (int id:mergingMap.keySet())
+					jLoader.mergeFiles(id,mergingMap.get(id),stepInputFolder,stepOutputFolder);
+				
+				// group MWE
+				MWEGrouping grouping = new MWEGrouping();
+				File clusterFolder = new File(stepOutputFolder);
+				for(File f:clusterFolder.listFiles())
+					if (f.getName().endsWith(".dataClusters.txt")){
+						grouping.groupMWEfile(f.getAbsolutePath(),mweThreshold, filterFreqModern);
+					}
+			
+				
+				File stepOutputDir = new File(stepOutputFolder);
+				// generate judgment file
+				for(File f:stepOutputDir.listFiles())
+					if (f.getName().endsWith(".dataGroups.txt")){
+						jLoader.exportRunData(f, judgmentsFolder);
+						jLoader.printUpdatedGroupsData(judgmentsFolder, f.getName());
+					}
+		////		
+		////		
+		////		
+		////		
+		////	
+				jLoader.printThesaurus(thesaurusFolder);
 			}
-			System.out.println(mergingMap);
-			String stepInputFolder = expClustersDirName;
-			String stepOutputFolder = expOutputFolder;
-			for (int id:mergingMap.keySet())
-				jLoader.mergeFiles(id,mergingMap.get(id),stepInputFolder,stepOutputFolder);
-			
-			// group MWE
-			MWEGrouping grouping = new MWEGrouping();
-			File clusterFolder = new File(stepOutputFolder);
-			for(File f:clusterFolder.listFiles())
-				if (f.getName().endsWith(".dataClusters.txt")){
-					grouping.groupMWEfile(f.getAbsolutePath(),mweThreshold, filterFreqModern);
-				}
-		
-			
-			File stepOutputDir = new File(stepOutputFolder);
-			// generate judgment file
-			for(File f:stepOutputDir.listFiles())
-				if (f.getName().endsWith(".dataGroups.txt")){
-					jLoader.exportRunData(f, judgmentsFolder);
-					jLoader.printUpdatedGroupsData(judgmentsFolder, f.getName());
-				}
-	////		
-	////		
-	////		
-	////		
-	////	
-			jLoader.printThesaurus(thesaurusFolder);
-		}
-		
+		}	
 		HashSet<String> folders = new HashSet<String>();
 		folders.add("judgments");
 		folders.add("input");
