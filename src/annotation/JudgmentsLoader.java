@@ -456,6 +456,37 @@ public class JudgmentsLoader {
 		return m_dupExpMap;
 	}
 	
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void checkContradictions(File file) throws IOException, SQLException{
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		int target_term_id = Integer.parseInt(file.getName().substring(0,file.getName().indexOf(".")));
+		String line = reader.readLine();
+		line = reader.readLine(); // skip the first line
+		int lineNum = 1;
+		HashMap<String, Integer> lemmaGroups = m_sql.getLemmas(target_term_id);
+		HashMap<String, Integer> resultGroups = m_sql.getResults(target_term_id);
+		while(line != null) {
+			Pair<Integer, Integer> annoPair = getAnnotation(resultGroups,lemmaGroups,line.split("\t")[0],line.split("\t")[1]);
+			int curAnno = Integer.parseInt(line.split("\t")[3]);
+			// positive judgment with group id
+			if (annoPair.value()>-1 && curAnno==0 ){
+				System.out.println(target_term_id+"\t"+line.split("\t")[0] + "\t" + lineNum + "\n");
+			}
+			// negative judgment
+			else if (annoPair.key()==0 && curAnno==1 ){
+				System.out.println(target_term_id+"\t"+line.split("\t")[0] + "\t" + lineNum + "\n");
+			}
+			line = reader.readLine();
+		}
+		reader.close();
+	}
+	
+	
 	private Wiktionary m_wiktionary;
 	private NgramData m_ngramData; 
 	private QueryGenerator m_qg;

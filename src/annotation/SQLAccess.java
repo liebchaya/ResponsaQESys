@@ -465,6 +465,27 @@ public class SQLAccess {
 	      
 	}
 	
+	/**
+	 * Gets groups list for iteration > 0
+	 * @param target_term_id
+	 * @return groups set
+	 * @throws SQLException
+	 */
+	public HashSet<Integer> getIterGroups4TargetTerm(int target_term_id) throws SQLException
+	{
+		HashSet<Integer> groupsMap = new HashSet<Integer>();
+		String sql = "select result_group from annotations where generation > 0 and result_group > -1 and target_term_id = ?" + 
+                     " group by result_group;";
+		PreparedStatement preparedStatement = m_connection.prepareStatement(sql);
+		preparedStatement.setInt(1, target_term_id);
+		ResultSet rs = preparedStatement.executeQuery();
+		while (rs.next()) {
+		     int result = rs.getInt("result_group");
+		     groupsMap.add(result);
+		}
+		rs.close();
+	    return groupsMap;
+	}
 	
 	 private Connection m_connection = null;
 	 private String m_databaseName;

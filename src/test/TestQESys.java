@@ -21,6 +21,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import mwe.MWEGrouping;
+import net.lingala.zip4j.model.ZipParameters;
 import obj.Pair;
 
 import org.apache.lucene.search.ScoreDoc;
@@ -48,6 +49,8 @@ import annotation.JudgmentsLoader;
 public class TestQESys {
 	public static void main(String[] args) throws Exception{
 		
+		String mail = args[2];
+		
 		ConfigurationFile conf = new ConfigurationFile(new File(args[0]));
 		ConfigurationParams params = conf.getModuleConfiguration("Experiment");
 		
@@ -71,6 +74,24 @@ public class TestQESys {
 		if (outputDir.exists())
 			FileUtils.deleteRecursive(outputDir);
 		outputDir.mkdir();
+		
+		File inputDir = new File(inputFolder);
+		if (inputDir.exists())
+			FileUtils.deleteRecursive(inputDir);
+		inputDir.mkdir();
+		
+		File judgmentsDir = new File(judgmentsFolder);
+		if (judgmentsDir.exists())
+			FileUtils.deleteRecursive(judgmentsDir);
+		judgmentsDir.mkdir();
+		
+		File annotatedDir = new File(annotationsFolder);
+		if (annotatedDir.exists())
+			FileUtils.deleteRecursive(annotatedDir);
+		annotatedDir.mkdir();
+		
+		
+		ZipUtils.unzip(args[1], mainDir);
 		
 		ConfigurationParams foParams = conf.getModuleConfiguration("FO");
 		String ngramsIndex = foParams.get("ngrams-index");
@@ -164,7 +185,7 @@ public class TestQESys {
 		/*
 		 * step 4 -  load annotations
 		 */
-		File annotatedDir = new File(annotationsFolder);
+//		File annotatedDir = new File(annotationsFolder);
 		if (annotatedDir.exists()) {
 			for(File f:annotatedDir.listFiles())
 				if(f.getAbsolutePath().endsWith(".dataGroups"))
@@ -175,7 +196,7 @@ public class TestQESys {
 			// generate expansion input file
 			
 			File expInputFile = new File(inputFolder+"exp_raw.txt");
-			if(!expInputFile.exists()) {
+			if(expInputFile.exists()) {
 				File expOutputFile = new File(expInputFile.getAbsolutePath().replace("_raw.txt", "_orig.txt"));
 				HashMap<Integer, Pair<Integer, String>> expMap = jLoader.generateExpansionsFile(expInputFile, expOutputFile);
 				System.out.println("Finish inserting expansions to the database");
@@ -257,17 +278,17 @@ public class TestQESys {
 			folders.add("thesaurus");
 		String zipPath = ZipUtils.zip(mainDir, folders);
 //		String command = "mailx -s \"Judgments System\" -a " + zipPath + " liebchaya@gmail.com";
-		sendMail(zipPath);
+		sendMail(zipPath, mail);
 //		System.out.println(command);
 //		Runtime.getRuntime().exec(command);
 		
 	}
 
 	
-	private static void sendMail(String attachment){
+	private static void sendMail(String attachment, String mail){
 	
 	// Recipient's email ID needs to be mentioned.
-    String to = "liebchaya@gmail.com";
+    String to = mail;
 
     // Sender's email ID needs to be mentioned
     String from = "liebchaya@gmail.com";

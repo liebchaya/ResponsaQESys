@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 import obj.Pair;
 
-public class baselineGeneration {
+public class BaselineGeneration {
 
 	/**
 	 * @param args
