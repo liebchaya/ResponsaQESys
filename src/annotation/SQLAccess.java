@@ -85,9 +85,9 @@ public class SQLAccess {
 	 * @param isNew
 	 * @throws SQLException
 	 */
-	public void insertAnnotation(String result,String lemma, int target_term_id, int generation, int position, int judgement, int period, int result_group, int expasion_id, Boolean isNew) throws SQLException{
+	public void insertAnnotation(String result,String lemma, int target_term_id, int generation, int position, int judgement, int period, int result_group, int expasion_id, Boolean isNew, int isManual) throws SQLException{
 	    PreparedStatement preparedStatement = m_connection
-        .prepareStatement("insert into annotations(id,result,lemma,target_term_id,generation,position,judgement,period,result_group,expansion_id,new_anno,created_at) values (null, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?, null)");
+        .prepareStatement("insert into annotations(id,result,lemma,target_term_id,generation,position,judgement,period,result_group,expansion_id,new_anno,is_manual,created_at) values (null, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?, ?, null)");
 		
 	      // Parameters start with 1
 	      preparedStatement.setString(1, result);
@@ -100,6 +100,7 @@ public class SQLAccess {
 	      preparedStatement.setInt(8, result_group);
 	      preparedStatement.setInt(9, expasion_id);
 	      preparedStatement.setBoolean(10, isNew);
+	      preparedStatement.setInt(11, isManual);
 	      System.out.println(preparedStatement.toString());
 	      preparedStatement.executeUpdate();
 	}
@@ -112,10 +113,10 @@ public class SQLAccess {
 	 * @param generation
 	 * @param period
 	 */
-	public void insertExpansion(String expansion, String target_term, int parent_exp_id, int generation, int period) throws SQLException{
+	public void insertExpansion(String expansion, String target_term, int parent_exp_id, int generation, int period, int isManual) throws SQLException{
 	      // PreparedStatements can use variables and are more efficient
 	      PreparedStatement preparedStatement = m_connection
-	          .prepareStatement("insert into expansions(id, expansion, target_term_id, parent_exp_id, generation, period, created_at) values (null, ?, ?, ?, ?, ?, null)");
+	          .prepareStatement("insert into expansions(id, expansion, target_term_id, parent_exp_id, generation, period, is_manual, created_at) values (null, ?, ?, ?, ?, ?, ?, null)");
 	      int target_term_id = Integer.parseInt(target_term);//getTargetTermId(target_term);
 	      // Parameters start with 1
 	      preparedStatement.setString(1, expansion);
@@ -123,6 +124,7 @@ public class SQLAccess {
 	      preparedStatement.setInt(3, parent_exp_id);
 	      preparedStatement.setInt(4, generation);
 	      preparedStatement.setInt(5, period);
+	      preparedStatement.setInt(6, isManual);
 	      preparedStatement.executeUpdate();
 	}
 	
@@ -316,7 +318,7 @@ public class SQLAccess {
 	      // also possible to get the columns via the column number
 	      // which starts at 1
 	      // e.g. resultSet.getSTring(2);
-	      String result = resultSet.getString("result");
+	      String result = resultSet.getString("mlen");
 	      int group = resultSet.getInt("result_group");
 	      int period = resultSet.getInt("m_period");
 	      if (!groupMap.containsKey(group))
@@ -485,6 +487,35 @@ public class SQLAccess {
 		}
 		rs.close();
 	    return groupsMap;
+	}
+	
+	/**
+	 * Gets groups data from the database for analysis
+	 * Each group has all her n-gram presentations 
+	 * @param target_term_id
+	 * @return data line for printing
+	 * @throws SQLException
+	 */
+	public String getGroupsDataLine(int target_term_id) throws SQLException
+	{
+		String sql = "select target_terms.target_term, annotations.result, annotations.result_group, MAX(annotations.period) as m_period, MIN(annotations.generation) as m_generation, annotations.target_term_id, REPLACE(GROUP_CONCAT(annotations.result SEPARATOR ' '),'] [',',')" + 
+					 " as mlen from annotations inner join target_terms on annotations.target_term_id = target_terms.id where result_group > -1 and target_term_id = ?" + 
+                     " group by result_group;";
+		PreparedStatement preparedStatement = m_connection.prepareStatement(sql);
+		preparedStatement.setInt(1, target_term_id);
+		ResultSet rs = preparedStatement.executeQuery();
+		String dataLine = "";
+		while(rs.next()){
+			int id = rs.getInt("target_term_id");
+			String name = rs.getString("target_term");
+			int group_id = rs.getInt("result_group");
+			int period = rs.getInt("m_period");
+			int generation = rs.getInt("m_generation");
+			String desc = rs.getString("mlen");
+			dataLine += id + "\t" + name + "\t" + group_id + "\t" + period + "\t"  + generation + "\t" + desc + "\n";
+		}
+		rs.close();
+		return dataLine;
 	}
 	
 	 private Connection m_connection = null;

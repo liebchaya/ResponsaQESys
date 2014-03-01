@@ -97,18 +97,18 @@ public class JudgmentsLoader {
 		BufferedReader reader = new BufferedReader(new FileReader(f));
 		String target_term = f.getName().substring(0,f.getName().indexOf("_")); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+target_term+".dataGroups"), "CP1255"));
-		writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\n");
+		writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\tManual\n");
 		// add wiktionary synonyms at the beginning of the annotation file
 		String target_term_desc = TargetTerm2Id.getStrDesc(Integer.parseInt(target_term));
 		for(String relTerm:m_wiktionary.getRelSet(target_term_desc, true, 1)){
 			int period = (m_ngramData.countOldPeriod(m_qg.generate(relTerm))>0?1:0);
 			// get the period of the related term
-			writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\n");
+			writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\t0\n");
 		}
 		String line = reader.readLine();
 		line = reader.readLine(); // skip the first line
 		while(line != null) {
-			writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1]+"\t"+ line.split("\t")[3]+"\t-99\t-88\t-1\t0\n");
+			writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1]+"\t"+ line.split("\t")[3]+"\t-99\t-88\t-1\t0\t0\n");
 			line = reader.readLine();
 		}
 		reader.close();
@@ -165,7 +165,7 @@ public class JudgmentsLoader {
 		int target_term_id = Integer.parseInt(file.getName().substring(0,file.getName().indexOf(".")));
 		System.out.println(file.getAbsolutePath());
 		while(line != null) {
-			m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, Integer.parseInt(line.split("\t")[6]), lineNum, Integer.parseInt(line.split("\t")[3]),Integer.parseInt(line.split("\t")[2]),Integer.parseInt(line.split("\t")[4]),Integer.parseInt(line.split("\t")[5]),true);
+			m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, Integer.parseInt(line.split("\t")[6]), lineNum, Integer.parseInt(line.split("\t")[3]),Integer.parseInt(line.split("\t")[2]),Integer.parseInt(line.split("\t")[4]),Integer.parseInt(line.split("\t")[5]),true,Integer.parseInt(line.split("\t")[7]));
 			line = reader.readLine();
 			lineNum ++;
 		}
@@ -198,7 +198,7 @@ public class JudgmentsLoader {
 				idGenerationMap.put(target_term_id, generation);
 			}
 			if (!tokens[1].trim().isEmpty())
-				m_sql.insertExpansion(tokens[1], tokens[0], Integer.parseInt(tokens[2]), generation, Integer.parseInt(tokens[3]));
+				m_sql.insertExpansion(tokens[1], tokens[0], Integer.parseInt(tokens[2]), generation, Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
 			line = reader.readLine();
 		}
 		reader.close();
@@ -255,15 +255,15 @@ public class JudgmentsLoader {
 			// positive judgment with group id
 			if (annoPair.value()>-1){
 				prevGroups.add(annoPair.value());
-				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false);
+				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false,0);
 			}
 			// already seen negative judgment
 			else if (annoPair.key()==0){
-				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false);
+				m_sql.insertAnnotation(line.split("\t")[0], line.split("\t")[1], target_term_id, generation, lineNum,annoPair.key(), Integer.parseInt(line.split("\t")[3]),annoPair.value(),Integer.parseInt(line.split("\t")[8]),false,0);
 			}
 			// write only non-annotated values
 			else
-				writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1] + "\t" + line.split("\t")[3] + "\t" + annoPair.key() + "\t" + annoPair.value() + "\t" + Integer.parseInt(line.split("\t")[8]) + "\t" + generation + "\n");
+				writer.write(line.split("\t")[0]+"\t"+line.split("\t")[1] + "\t" + line.split("\t")[3] + "\t" + annoPair.key() + "\t" + annoPair.value() + "\t" + Integer.parseInt(line.split("\t")[8]) + "\t" + generation + "\t0\n");
 			line = reader.readLine();
 			lineNum ++;
 		}

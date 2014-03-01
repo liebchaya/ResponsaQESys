@@ -54,7 +54,9 @@ public class TestQESys {
 		ConfigurationFile conf = new ConfigurationFile(new File(args[0]));
 		ConfigurationParams params = conf.getModuleConfiguration("Experiment");
 		
-		String mainDir = params.get("main-dir");
+		String usr = mail.substring(0,mail.indexOf("@"));
+		
+		String mainDir = params.get("main-dir")+"/"+usr;
 		String rawTermFile = params.get("raw-terms-file");
 		String targetTermFile = rawTermFile.replace(".txt", "_orig.txt");
 		String wiktionaryFile = params.get("wiktionary-file");
@@ -64,7 +66,6 @@ public class TestQESys {
 		
 		
 		String inputFolder = mainDir+"/input/";
-		String wikiFolder = mainDir+"/wiktionary/";
 		String outputFolder = mainDir+"/output/";
 		String judgmentsFolder = mainDir+"/judgments/";
 		String annotationsFolder = mainDir+"/annotated/";
@@ -122,7 +123,7 @@ public class TestQESys {
 		double mweThreshold = ngramParam.getDouble("mwe-threshold");
 		boolean filterFreqModern = ngramParam.getBoolean("filter-freq-modern");
 		
-		JudgmentsLoader jLoader = new JudgmentsLoader(databaseName,wikiFolder+wiktionaryFile,oldIndex);
+		JudgmentsLoader jLoader = new JudgmentsLoader(databaseName,wiktionaryFile,oldIndex);
 		File newInputFile = new File(inputFolder+rawTermFile);
 		// Statistics extraction for new terms
 		if (newInputFile.exists()) {
