@@ -180,7 +180,7 @@ public class TestQESys {
 				if (f.getName().endsWith(".dataGroups.txt"))
 					jLoader.generateIntialJudgmentFile(f, judgmentsFolder);
 			// add wiktionary expansions when there isn't any statistical information
-			jLoader.addWikiIntialJudgmentFiles(judgmentsFolder);
+			jLoader.addWikiIntialJudgmentFiles(judgmentsFolder,firstId);
 			System.out.println("Finish generating new annotation files");
 		}
 		/*

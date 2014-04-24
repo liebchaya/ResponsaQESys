@@ -18,8 +18,8 @@ public class FixAnnotated1Step {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		String outputFolder = "C:\\Documents and Settings\\HZ\\QEsys\\fix\\";
-		File annotatedFolder = new File("C:\\Documents and Settings\\HZ\\QEsys\\annotated\\");
+		String outputFolder = "C:\\Documents and Settings\\HZ\\Desktop\\newannotated\\";
+		File annotatedFolder = new File("C:\\Documents and Settings\\HZ\\Desktop\\annotated\\");
 		for(File f:annotatedFolder.listFiles()){
 			if (f.getName().endsWith(".dataGroups")){
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+f.getName()), "CP1255"));
@@ -34,8 +34,8 @@ public class FixAnnotated1Step {
 					if(line.trim().isEmpty())
 						writer.write("\n");
 					else {
-						line = line.substring(0,line.lastIndexOf("\t"));
-						writer.write(line+"\t1\n");
+						//line = line.substring(0,line.lastIndexOf("\t"));
+						writer.write(line+"\t0\n");
 					}
 					line = reader.readLine();
 					

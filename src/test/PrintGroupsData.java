@@ -38,8 +38,13 @@ public class PrintGroupsData {
 //		JudgmentsLoader jLoader = new JudgmentsLoader(databaseName,wikiFolder+wiktionaryFile,oldIndex);
 //		jLoader.printAllGroupsData(outputDir.getAbsolutePath());
 		
-		SQLAccess sql = new SQLAccess(args[0]);
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[1]), "CP1255"));
+		String db = "iterativefull";
+		String outputFile = "C:\\prevThes.txt";
+		SQLAccess sql = new SQLAccess(db);
+//		SQLAccess sql = new SQLAccess(args[0]);
+//		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[1]), "CP1255"));
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "CP1255"));
+		writer.write("id\tname\tgroup_id\tperiod\tgeneration\tdesc\n");
 		HashMap<Integer, String> terms = sql.getTargetTermList();
 		for(int id:terms.keySet()){
 			String termData = sql.getGroupsDataLine(id);

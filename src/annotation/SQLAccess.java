@@ -31,9 +31,13 @@ public class SQLAccess {
 	      Class.forName("com.mysql.jdbc.Driver");
 	      m_databaseName = databaseName;
 	      // Setup the connection with the DB
+//	      m_connection = DriverManager
+//	          .getConnection("jdbc:mysql://localhost/"+m_databaseName+"?characterEncoding=UTF-8&"
+//	              + "user=root&password=Miescuel2");
 	      m_connection = DriverManager
-	          .getConnection("jdbc:mysql://localhost/"+m_databaseName+"?characterEncoding=UTF-8&"
-	              + "user=root&password=Miescuel2");
+          .getConnection("jdbc:mysql://localhost/"+m_databaseName+"?characterEncoding=UTF-8&"
+              + "user=root&password=");
+
 	}
 	
 	/**
@@ -518,6 +522,27 @@ public class SQLAccess {
 		return dataLine;
 	}
 	
+	/**
+	 * Gets annotations' sum, above step 0, for evaluation
+	 * @param target_term_id
+	 * @return
+	 * @throws SQLException
+	 */
+	public int getIterStepAnnoCount(int target_term_id) throws SQLException
+	{
+		String sql = "select count(*) as count from annotations where generation>0 and new_anno=1 and target_term_id =?;";
+		PreparedStatement preparedStatement = m_connection.prepareStatement(sql);
+		preparedStatement.setInt(1, target_term_id);
+		ResultSet rs = preparedStatement.executeQuery();
+		int count = 0;
+		while(rs.next()){
+			count = rs.getInt("count");
+		}
+		rs.close();
+		return count;
+	}
+	 
+
 	 private Connection m_connection = null;
 	 private String m_databaseName;
 }

@@ -18,8 +18,8 @@ public class GetNextTargetTerms {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		String fullTT = "C:\\Documents and Settings\\HZ\\Desktop\\thesaurus terms\\CleanTrainSet.txt";
-		String alreadyTT = "C:\\Documents and Settings\\HZ\\Desktop\\thesaurus terms\\targetTerms100.txt";
+		String fullTT = "C:\\Documents and Settings\\HZ\\Desktop\\thesaurus terms\\CleanTestSet.txt";
+		String alreadyTT = "C:\\Documents and Settings\\HZ\\Desktop\\thesaurus terms\\targetTermsPrev.txt";
 		String newTT = "C:\\Documents and Settings\\HZ\\Desktop\\thesaurus terms\\targetTerms4run.txt";
 		HashSet<String> alreadySet = FileUtils.loadFileToSet(new File(alreadyTT));
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newTT), "UTF-8"));

@@ -27,6 +27,45 @@ public class Evalutaion {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
 	
 		HashMap<Integer, HashSet<Integer>> iter = getPositiveIterGroups();
+		HashMap<Integer, HashSet<Integer>> baseline = getPositiveGroups(23,34);
+		HashMap<Integer, HashSet<Integer>> step0 = getPositiveGroups(8,15);
+		System.out.println(iter.get(9));
+		// union of iterative results (step0 + iter)
+		Set<Integer> keys = iter.keySet();
+		for(int key:keys){
+			if(step0.containsKey(key))
+				iter.get(key).addAll(step0.get(key));
+		}
+		// now iter contains all the iterative process
+		// union recall from iter and baseline
+		HashMap<Integer, HashSet<Integer>> all = new HashMap<Integer, HashSet<Integer>>();
+		for(int key:iter.keySet()){
+			HashSet<Integer> groups = new HashSet<Integer>(); 
+			groups.addAll(iter.get(key));
+			if(baseline.containsKey(key))
+				groups.addAll(baseline.get(key));
+			all.put(key, groups);
+		}
+		System.out.println("target_term_id\tbaseline\titer\tall\tstep0");
+		for(int key:keys){
+			HashSet<Integer> groups = all.get(key);
+			for(int g:groups){
+				int baseGroup = -99, iterGroup = -99, step0Group = -99;
+				if(baseline.containsKey(key) && baseline.get(key).contains(g))
+					baseGroup = g;
+				if(iter.containsKey(key) && iter.get(key).contains(g))
+					iterGroup = g;
+				if(step0.containsKey(key) && step0.get(key).contains(g))
+					step0Group = g;
+				System.out.println(key + "\t" + baseGroup + "\t" + iterGroup + "\t" + g + "\t" + step0Group);
+			}
+		}
+
+	}
+
+	public static void eval1() throws IOException, ClassNotFoundException, SQLException {
+		
+		HashMap<Integer, HashSet<Integer>> iter = getPositiveIterGroups();
 		HashMap<Integer, HashSet<Integer>> baseline = getPositiveGroups(10,42);
 		HashMap<Integer, HashSet<Integer>> step0 = getPositiveGroups(8,15);
 		System.out.println(iter.get(9));
@@ -60,9 +99,7 @@ public class Evalutaion {
 			System.out.println(key + "\t" + countBaseline + "\t" + countIter + "\t" + countAll + "\t" + countStep0);
 			
 		}
-
 	}
-
 	public static void getStep0Groups() throws IOException{
 		HashMap<Integer, HashSet<Integer>> baseline = getPositiveGroups(10,40);
 		HashMap<Integer, HashSet<Integer>> step0 = getPositiveGroups(8,15);

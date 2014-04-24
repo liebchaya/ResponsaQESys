@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FindBaselineK {
 
@@ -18,8 +21,9 @@ public class FindBaselineK {
 //		for(int i=10;i<40;i++)
 //		 System.out.println(i + "\t" + countKpositives(false,i));
 		
-		for(int i=38;i<46;i++)
-			System.out.println(i+ "\t" +countKpositives(false,i));
+//		for(int i=1;i<46;i++)
+//			System.out.println(i+ "\t" +countKjudgments(false,i));
+		System.out.println(34+ "\t" +countKjudgments(false,34));
 	}
 	
 	public static int getTotalJudgments(File f, boolean isAncient) throws IOException{
@@ -260,15 +264,21 @@ public class FindBaselineK {
 //			System.out.println("ancient");
 //		else
 //			System.out.println("modern");
-		String annotationDir = "C:\\Documents and Settings\\HZ\\Desktop\\QEsys_baseline\\QEsys\\annotated";
+		String annotationDir = "C:\\Documents and Settings\\HZ\\Desktop\\AnalJournalIterative\\QEsys_baseline\\QEsys\\annotated";
 		int sum = 0;
+		Set<Integer> tSet =  new HashSet(Arrays.asList(new String[] {"1","2","3","4","36","8","9","10","11","12","15","17","16","19","18","21","20","23","22","25","24","27","26","28","31","30","35","32","33","38"})) ;
+		int tCount = 0;
 		File annDir = new File(annotationDir);
 		for(File f:annDir.listFiles()){
 			int count = 0;
-			int positive = 0;
+//			int positive = 0;
 			boolean bFound = false;
 			int total = 0;
 			if(f.getName().endsWith(".dataGroups")){
+				String fDesc = f.getName().substring(0, f.getName().indexOf(".")).trim();
+				if(tSet.contains(fDesc)){
+					tCount ++;
+//					System.out.println(tCount);
 				BufferedReader reader = new BufferedReader(new FileReader(f));
 				reader.readLine(); // skip the first line
 				String line = reader.readLine();
@@ -283,14 +293,17 @@ public class FindBaselineK {
 								count ++;
 								if (count==K){
 									sum+=total;
+									System.out.println(f.getName().substring(0,f.getName().indexOf(".")) + "\t" + total);
 									bFound = true;
 									break;
 								}
 							} else {
-								positive++;
+//								positive++;
 								count = 0;
 							}
 						}
+						line = reader.readLine();
+						
 					}
 					else {
 					// modern term
@@ -301,29 +314,38 @@ public class FindBaselineK {
 								count ++;
 								if (count==K){
 									sum+=total;
+									System.out.println(f.getName().substring(0,f.getName().indexOf(".")) + "\t" + total);
 									bFound = true;
 									break;
 									}
 								}
-							} else {
+							 else {
 								count = 0;
 							}
 						}
-					
 					line = reader.readLine();
+					}
 				}
 				if (!bFound){
 					int sumJudg = getTotalJudgments(f,isAncient);
-					if (sumJudg == total)
+					if (sumJudg == total){
 						sum += total;
-					else if (sumJudg > total+(K-count))
+						System.out.println(f.getName().substring(0,f.getName().indexOf(".")) + "\t" + total);
+					}
+					else if (sumJudg > total+(K-count)){
 						sum += total + (K-count);
-					else
+						System.out.println(f.getName().substring(0,f.getName().indexOf(".")) + "\t" + (total + (K-count)));
+					}
+					else{
 						sum += sumJudg;
+						System.out.println(f.getName().substring(0,f.getName().indexOf(".")) + "\t" + sumJudg);
+					}
 				}
 			}
 		}
+		}
 //		System.out.println("Total sum of judgments with " + K + ": " + sum);
+		
 		return sum;
 	}
 		

@@ -119,8 +119,9 @@ public class JudgmentsLoader {
 	 * Generates the first statistics extraction for judgments, which include only wiktionary expansions
 	 * Output file format: ngram, lemma, ancient/modern (1/0), judgment, group, expansion id
 	 * @param outputFolder judgments' folder
+	 * @param startId
 	 */
-	public void addWikiIntialJudgmentFiles(String outputFolder) throws IOException, ParseException{
+	public void addWikiIntialJudgmentFiles(String outputFolder, int startId) throws IOException, ParseException{
 		File judgmentsDir = new File(outputFolder);
 		if (!judgmentsDir.exists())
 			judgmentsDir.mkdir();
@@ -131,17 +132,17 @@ public class JudgmentsLoader {
 			idSet.add(Integer.parseInt(s.substring(0,s.indexOf("."))));
 		
 		for(int id:TargetTerm2Id.getIds()){
-			if (!idSet.contains(id)){
+			if (id >= startId && !idSet.contains(id)){
 				// add wiktionary synonyms at the beginning of the annotation file
 				String target_term_desc = TargetTerm2Id.getStrDesc(id);
 				HashSet<String> wikiList = m_wiktionary.getRelSet(target_term_desc, true, 1);
 				if (!wikiList.isEmpty()){
 					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFolder+"/"+id+".dataGroups"), "CP1255"));
-					writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\n");
+					writer.write("Term\tLemma\tOldCount\tJudgment\tGroup\tParent\tGeneration\tManual\n");
 					for(String relTerm:wikiList){
 						int period = (m_ngramData.countOldPeriod(m_qg.generate(relTerm))>0?1:0);
 						// get the period of the related term
-						writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\n");
+						writer.write("["+relTerm+"]\t["+relTerm+"]\t"+ period +"\t-99\t-88\t-1\t0\t0\n");
 					}
 					writer.close();
 				}
